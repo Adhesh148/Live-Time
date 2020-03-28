@@ -31,7 +31,8 @@ public class MainView extends AppLayout {
     }
 
     private void createDrawer() {
-        addToDrawer(new VerticalLayout(new RouterLink("Dashboard",DashboardView.class),new RouterLink("Live View",ViewTimeTable.class)));
+        addToDrawer(new VerticalLayout(new RouterLink("Dashboard",DashboardView.class),new RouterLink("Live View",ViewTimeTable.class),
+                new RouterLink("Faculty",FacultyView.class)));
     }
 
     private void createHeader() {

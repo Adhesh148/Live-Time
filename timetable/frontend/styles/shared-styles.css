@@ -29,6 +29,9 @@
 
 }
 */
+.faculty-list .faculty-content{
+    display:flex;
+}
 .information-form {
     flex: 1;
     padding: var(--lumo-space-m); /*
