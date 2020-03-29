@@ -1,5 +1,6 @@
 package com.vaadin.timetable;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -12,40 +13,54 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.timetable.backend.CourseEntry;
+import com.vaadin.timetable.backend.BatchEntry;
 import com.vaadin.timetable.backend.FacultyEntry;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.time.Year;
 
-public class CourseInformationForm extends VerticalLayout {
+import static com.vaadin.flow.component.Key.FN;
+
+
+public class BatchInformationForm extends VerticalLayout {
+    public int flag =0;
     //Pre-requisites for mysql connection
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
     String pwd = "Password_123";
 
-    String originalCC = "";
-    String OriginalCN = "";
+    int originalBNo;
+    String originalBC ="";
+    String originalBN ="";
+    String originalYear ="";
+    String originalSpec = "";
 
     H2 header = new H2("Edit Information");
     Label guideline = new Label("* Double-click on the field to edit.");
-    TextField courseCode = new TextField("Course Code");
-    TextField courseName = new TextField("Course Name");
+    TextField batchNo = new TextField("Batch Number");
+    TextField batchCode = new TextField("Batch Code");
+    TextField batchName = new TextField("Batch Name");
+    TextField year = new TextField("Year");
+    TextField spec = new TextField("Specialization");
 
     Button save = new Button("Save");
     Button delete = new Button("Delete");
     Button close = new Button("Cancel");
 
-    public CourseInformationForm(){
-        courseName.setHeight("80px");
-        courseName.setWidth("400px");
-        courseCode.setWidth("400px");
-        this.setWidth("500px");
-        //setSizeUndefined();
-        addClassName("course-info-form");
+    public BatchInformationForm(){
+        batchNo.setWidth("400px");
+        batchCode.setWidth("400px");
+        batchName.setWidth("400px");
+        year.setWidth("400px");
+        spec.setWidth("400px");
 
-        add(header, guideline, courseCode, courseName,createButtonsLayout());
+        this.setWidth("500px");
+        addClassName("batch-info-form");
+
+        add(header,guideline,batchNo,batchCode,batchName,year,spec,createButtonsLayout());
+
     }
 
     private HorizontalLayout createButtonsLayout() {
@@ -60,16 +75,16 @@ public class CourseInformationForm extends VerticalLayout {
             this.setVisible(false);
         });
 
-        delete.addClickListener(evt -> deleteCourse());
+        delete.addClickListener(evt -> deleteBatch());
 
         save.addClickListener(evt -> {
-            saveCourse();
+            saveBatch();
         });
 
         return new HorizontalLayout(save,delete,close);
-
     }
-    private void saveCourse() {
+
+    private void saveBatch() {
         Dialog dialog = new Dialog();
         H4 header = new H4("Confirm Edit");
         Label message = new Label("Are you sure you want to update the item?");
@@ -91,32 +106,35 @@ public class CourseInformationForm extends VerticalLayout {
         dialog.open();
 
         update.addClickListener(evt -> {
-            if(originalCC.equals(""))
+            if(flag == 0) {
                 onADD();
-            else
+            }else{
                 onSave();
+            }
             dialog.close();
             update.getUI().ifPresent(ui -> {ui.navigate("");});
-            update.getUI().ifPresent(ui -> {ui.navigate("course-view");});
+            update.getUI().ifPresent(ui -> {ui.navigate("batch-view");});
 
         });
-
         cancel.addClickListener(evt -> {
             dialog.close();
         });
-
     }
 
     private void onADD() {
-        String CC = courseCode.getValue();
-        String CN = courseName.getValue();
+        int BNo = Integer.parseInt(batchNo.getValue());
+        String BC = batchCode.getValue();
+        String BN = batchName.getValue();
+        String Year = year.getValue();
+        String Spec = spec.getValue();
+
 
         try{
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
             boolean rs;
-            String sql = "Insert into course values ('"+CC+"','"+CN+"');";
+            String sql = "Insert into batch values ("+BNo+",'"+BC+"','"+BN+"','"+Year+"','"+Spec+"');";
             rs = stmt.execute(sql);
             Notification.show("Row Successfully Inserted.", 2000,Notification.Position.MIDDLE);
 
@@ -126,15 +144,18 @@ public class CourseInformationForm extends VerticalLayout {
     }
 
     private void onSave() {
-        String newCC = courseCode.getValue();
-        String newCN = courseName.getValue();
+        int newBNo = Integer.parseInt(batchNo.getValue());
+        String newBC = batchCode.getValue();
+        String newBN = batchName.getValue();
+        String newYear = year.getValue();
+        String newSpec = spec.getValue();
 
         try{
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
             int rs;
-            String sql = "update course set courseName ='"+newCN+"',courseCode = '"+newCC+"' where courseCode='"+originalCC+"';";
+            String sql = "update batch set batchNo ='"+newBNo+"',batchCode = '"+newBC+"',batchName = '"+newBN+"',year = '"+newYear+"',specialization ='"+newSpec+"' where batchNo="+Integer.parseInt(batchNo.getValue())+";";
             rs = stmt.executeUpdate(sql);
             if(rs>0)
                 Notification.show("Row Successfully Updated.", 2000,Notification.Position.MIDDLE);
@@ -143,10 +164,9 @@ public class CourseInformationForm extends VerticalLayout {
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage(),2000,Notification.Position.MIDDLE);
         }
-
     }
 
-    private void deleteCourse() {
+    private void deleteBatch() {
         Dialog dialog = new Dialog();
         H4 header = new H4("Confirm Delete");
         Label message = new Label("Are you sure you want to delete the item?");
@@ -172,13 +192,12 @@ public class CourseInformationForm extends VerticalLayout {
             dialog.close();
             // Roundabout way to refresh the grid. Could look into another way..
             delete.getUI().ifPresent(ui -> {ui.navigate("");});
-            delete.getUI().ifPresent(ui -> {ui.navigate("course-view");});
+            delete.getUI().ifPresent(ui -> {ui.navigate("batch-view");});
             //Could show a dialog box
         });
         cancel.addClickListener(evt -> {
             dialog.close();
         });
-
     }
 
     private void onDelete() {
@@ -188,7 +207,7 @@ public class CourseInformationForm extends VerticalLayout {
             Statement stmt = con.createStatement();
             int rs;
             String sql;
-            sql = "delete from course where courseCode = '"+courseCode.getValue()+"';";
+            sql = "delete from batch where batchNo = "+Integer.parseInt(batchNo.getValue())+";";
             rs = stmt.executeUpdate(sql);
             if(rs > 0)
                 Notification.show("Row Successfully Deleted.", 2000,Notification.Position.MIDDLE);
@@ -200,11 +219,21 @@ public class CourseInformationForm extends VerticalLayout {
         }
     }
 
-    public void setInformation(CourseEntry value) {
-        courseCode.setValue(value.getCourseCode());
-        courseName.setValue(value.getCourseName());
+    public void setInformation(BatchEntry value,int cnt) {
+        flag =0;
+        if(cnt!=0)
+            ++flag;
+        batchNo.setValue(String.valueOf(value.getBatchNo()));
+        batchCode.setValue(value.getBatchCode());
+        batchName.setValue(value.getBatchName());
+        year.setValue(value.getYear());
+        spec.setValue(value.getSpecialization());
 
-        originalCC = value.getCourseCode();
-        OriginalCN = value.getCourseName();
+        originalBNo = Integer.parseInt(batchNo.getValue());
+        originalBC = batchCode.getValue();
+        originalBN = batchName.getValue();
+        originalYear = year.getValue();
+        originalSpec = spec.getValue();
     }
+
 }

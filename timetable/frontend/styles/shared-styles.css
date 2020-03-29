@@ -38,3 +38,14 @@
 
  */
 }
+.delete-dialog-content{
+       background-color:lightblue
+}
+
+.course-list .course-content{
+    display:flex;
+}
+
+.batch-list .batch-content{
+    display:flex;
+}

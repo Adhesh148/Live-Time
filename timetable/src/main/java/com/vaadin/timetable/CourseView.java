@@ -1,7 +1,5 @@
 package com.vaadin.timetable;
 
-
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
@@ -13,38 +11,39 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.timetable.backend.CourseEntry;
 import com.vaadin.timetable.backend.FacultyEntry;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
 
-
-@Route(value = "faculty-view",layout = MainView.class)
-@PageTitle("Faculty View | Live Timetable")
-public class FacultyView extends VerticalLayout {
-
+@Route(value = "course-view",layout = MainView.class)
+@PageTitle("Course View | Live Timetable")
+public class CourseView extends VerticalLayout {
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
     String pwd = "Password_123";
-    Grid<FacultyEntry> grid = new Grid<>(FacultyEntry.class);
+
+    Grid<CourseEntry> grid = new Grid<>(CourseEntry.class);
     TextField filterText = new TextField();
-    FacultyInformationForm form = new FacultyInformationForm();
+    CourseInformationForm form = new CourseInformationForm();
 
     Icon addNew = new Icon(VaadinIcon.PLUS_CIRCLE);
 
-    public FacultyView(){
-        setClassName("faculty-list");
+    public CourseView(){
+        setClassName("course-list");
         setSizeFull();
 
         configureGrid(grid);
-        fillFacultyGrid();
+        fillCourseGrid();
 
         configureFilter(filterText);
         Div content = new Div(grid,form);
-        content.addClassName("faculty-content");
+        content.addClassName("course-content");
         content.setSizeFull();
         //set form to not be visible unless grid is clicked
         form.setVisible(false);
@@ -59,15 +58,14 @@ public class FacultyView extends VerticalLayout {
         add(toolBar,content);
 
     }
-
     private void addFaculty() {
         form.setVisible(true);
-        form.facultyCode.setValue("");
-        form.facultyName.setValue("");
+        form.courseCode.setValue("");
+        form.courseName.setValue("");
     }
 
     private void configureFilter(TextField filterText) {
-        filterText.setPlaceholder("Filter by faculty name");
+        filterText.setPlaceholder("Filter by course name");
         filterText.setClearButtonVisible(true);
         filterText.setValueChangeMode(ValueChangeMode.LAZY);
         filterText.addValueChangeListener(evt -> updateList());
@@ -84,14 +82,14 @@ public class FacultyView extends VerticalLayout {
             ResultSet rs;
 
             // Get values from backend matching the filter pattern
-            sql = "select facultyCode,facultyName from faculty where facultyName like '%"+filter+"%';";
+            sql = "select courseCode,courseName from course where courseName like '%"+filter+"%';";
             rs = stmt.executeQuery(sql);
 
-            Collection<FacultyEntry> data = new ArrayList<FacultyEntry>();
+            Collection<CourseEntry> data = new ArrayList<>();
             while(rs.next()){
-                FacultyEntry entry = new FacultyEntry();
-                entry.setFacultyCode(rs.getString("facultyCode"));
-                entry.setFacultyName(rs.getString("facultyName"));
+                CourseEntry entry = new CourseEntry();
+                entry.setCourseCode(rs.getString("courseCode"));
+                entry.setCourseName(rs.getString("courseName"));
                 data.add(entry);
             }
             grid.setItems(data);
@@ -102,7 +100,7 @@ public class FacultyView extends VerticalLayout {
         }
     }
 
-    public void fillFacultyGrid() {
+    public void fillCourseGrid() {
         try{
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(url,user,pwd);
@@ -110,15 +108,15 @@ public class FacultyView extends VerticalLayout {
             String sql;
             ResultSet rs;
 
-            sql = "select facultyCode, facultyName from faculty";
+            sql = "select courseCode, courseName from course";
             rs = stmt.executeQuery(sql);
 
-            Collection<FacultyEntry> data = new ArrayList<FacultyEntry>();
+            Collection<CourseEntry> data = new ArrayList<>();
 
             while(rs.next()){
-                FacultyEntry entry = new FacultyEntry();
-                entry.setFacultyCode(rs.getString("facultyCode"));
-                entry.setFacultyName(rs.getString("facultyName"));
+                CourseEntry entry = new CourseEntry();
+                entry.setCourseCode(rs.getString("courseCode"));
+                entry.setCourseName(rs.getString("courseName"));
                 data.add(entry);
             }
             grid.setItems(data);
@@ -129,11 +127,12 @@ public class FacultyView extends VerticalLayout {
 
     }
 
-    private void configureGrid(Grid<FacultyEntry> grid) {
-        grid.getColumnByKey("facultyCode").setHeader("Faculty Code");
-        grid.getColumnByKey("facultyName").setHeader("Faculty Name");
+    private void configureGrid(Grid<CourseEntry> grid) {
+        grid.getColumnByKey("courseCode").setHeader("Course Code");
+        grid.getColumnByKey("courseName").setHeader("Course Name");
 
-        grid.setSizeFull();
+        //grid.setSizeFull();
+        grid.setHeightByRows(true);
 
         grid.getColumns().forEach(col -> col.setWidth("300px"));
         grid.setSortableColumns();
@@ -143,20 +142,18 @@ public class FacultyView extends VerticalLayout {
 
     }
 
-    private void editForm(FacultyEntry value) {
+    private void editForm(CourseEntry value) {
         if(value == null){
             closeEditor();
         }else{
             form.setVisible(true);
-            addClassName("faculty-editing");
+            addClassName("course-editing");
             form.setInformation(value);
         }
     }
 
     private void closeEditor() {
         form.setVisible(false);
-        removeClassName("faculty-editing");
+        removeClassName("course-editing");
     }
-
-
 }

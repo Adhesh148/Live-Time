@@ -1,11 +1,13 @@
 package com.vaadin.timetable;
 
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.details.DetailsVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification;
@@ -31,8 +33,11 @@ public class MainView extends AppLayout {
     }
 
     private void createDrawer() {
-        addToDrawer(new VerticalLayout(new RouterLink("Dashboard",DashboardView.class),new RouterLink("Live View",ViewTimeTable.class),
-                new RouterLink("Faculty",FacultyView.class)));
+        Accordion accordion = new Accordion();
+        VerticalLayout db_children = new VerticalLayout();
+        db_children.add(new RouterLink("Course",CourseView.class),new RouterLink("Faculty",FacultyView.class),new RouterLink("Batch",BatchView.class));
+        accordion.add("Database",db_children);
+        addToDrawer(new VerticalLayout(new RouterLink("Dashboard",DashboardView.class),new RouterLink("Live View",ViewTimeTable.class),accordion));
     }
 
     private void createHeader() {

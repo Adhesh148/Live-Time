@@ -4,7 +4,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.Label;
-import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -25,7 +24,7 @@ public class ViewTimeTable extends VerticalLayout {
     String user = "dbms";
     String pwd = "Password_123";
     Grid<TableEntry> grid;
-    CourseInformationForm form = new CourseInformationForm();
+    SlotInformationForm form = new SlotInformationForm();
 
     public ViewTimeTable(){
         ComboBox comboBox = new ComboBox();

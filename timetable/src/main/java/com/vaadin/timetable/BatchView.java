@@ -1,7 +1,5 @@
 package com.vaadin.timetable;
 
-
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.Icon;
@@ -13,38 +11,40 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.timetable.backend.FacultyEntry;
+import com.vaadin.timetable.backend.BatchEntry;
+import com.vaadin.timetable.backend.CourseEntry;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
 
-
-@Route(value = "faculty-view",layout = MainView.class)
-@PageTitle("Faculty View | Live Timetable")
-public class FacultyView extends VerticalLayout {
-
+@Route(value = "batch-view",layout = MainView.class)
+@PageTitle("Batch View | Timetable")
+public class BatchView extends VerticalLayout {
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
     String pwd = "Password_123";
-    Grid<FacultyEntry> grid = new Grid<>(FacultyEntry.class);
+
+    Grid<BatchEntry> grid = new Grid<>(BatchEntry.class);
     TextField filterText = new TextField();
-    FacultyInformationForm form = new FacultyInformationForm();
+    BatchInformationForm form = new BatchInformationForm();
 
     Icon addNew = new Icon(VaadinIcon.PLUS_CIRCLE);
 
-    public FacultyView(){
-        setClassName("faculty-list");
+    public BatchView(){
+        setClassName("batch-list");
         setSizeFull();
 
         configureGrid(grid);
-        fillFacultyGrid();
+        fillBatchGrid();
 
         configureFilter(filterText);
         Div content = new Div(grid,form);
-        content.addClassName("faculty-content");
+        content.addClassName("batch-content");
         content.setSizeFull();
         //set form to not be visible unless grid is clicked
         form.setVisible(false);
@@ -53,21 +53,26 @@ public class FacultyView extends VerticalLayout {
         toolBar.setAlignSelf(Alignment.CENTER, addNew);
 
         addNew.addClickListener(evt -> {
-            addFaculty();
+            addBatch();
         });
 
         add(toolBar,content);
 
     }
 
-    private void addFaculty() {
+    private void addBatch() {
         form.setVisible(true);
-        form.facultyCode.setValue("");
-        form.facultyName.setValue("");
+        form.batchNo.setValue("");
+        form.batchCode.setValue("");
+        form.batchName.setValue("");
+        form.year.setValue("");
+        form.spec.setValue("");
+
+        form.setInformation(null,0);
     }
 
     private void configureFilter(TextField filterText) {
-        filterText.setPlaceholder("Filter by faculty name");
+        filterText.setPlaceholder("Filter by batch name");
         filterText.setClearButtonVisible(true);
         filterText.setValueChangeMode(ValueChangeMode.LAZY);
         filterText.addValueChangeListener(evt -> updateList());
@@ -84,14 +89,17 @@ public class FacultyView extends VerticalLayout {
             ResultSet rs;
 
             // Get values from backend matching the filter pattern
-            sql = "select facultyCode,facultyName from faculty where facultyName like '%"+filter+"%';";
+            sql = "select * from batch where batchName like '%"+filter+"%';";
             rs = stmt.executeQuery(sql);
 
-            Collection<FacultyEntry> data = new ArrayList<FacultyEntry>();
+            Collection<BatchEntry> data = new ArrayList<>();
             while(rs.next()){
-                FacultyEntry entry = new FacultyEntry();
-                entry.setFacultyCode(rs.getString("facultyCode"));
-                entry.setFacultyName(rs.getString("facultyName"));
+                BatchEntry entry = new BatchEntry();
+                entry.setBatchNo(Integer.parseInt(rs.getString("batchNo")));
+                entry.setBatchCode(rs.getString("batchCode"));
+                entry.setBatchName(rs.getString("batchName"));
+                entry.setYear(rs.getString("year"));
+                entry.setSpecialization(rs.getString("specialization"));
                 data.add(entry);
             }
             grid.setItems(data);
@@ -102,7 +110,7 @@ public class FacultyView extends VerticalLayout {
         }
     }
 
-    public void fillFacultyGrid() {
+    public void fillBatchGrid() {
         try{
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(url,user,pwd);
@@ -110,15 +118,19 @@ public class FacultyView extends VerticalLayout {
             String sql;
             ResultSet rs;
 
-            sql = "select facultyCode, facultyName from faculty";
+            sql = "select * from batch";
             rs = stmt.executeQuery(sql);
 
-            Collection<FacultyEntry> data = new ArrayList<FacultyEntry>();
-
+            Collection<BatchEntry> data = new ArrayList<>();
             while(rs.next()){
-                FacultyEntry entry = new FacultyEntry();
-                entry.setFacultyCode(rs.getString("facultyCode"));
-                entry.setFacultyName(rs.getString("facultyName"));
+                BatchEntry entry = new BatchEntry();
+                entry.setBatchNo(Integer.parseInt(rs.getString("batchNo")));
+                entry.setBatchCode(rs.getString("batchCode"));
+                entry.setBatchName(rs.getString("batchName"));
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(rs.getDate("year"));
+                entry.setYear(String.valueOf(cal.get(Calendar.YEAR)));
+                entry.setSpecialization(rs.getString("specialization"));
                 data.add(entry);
             }
             grid.setItems(data);
@@ -126,16 +138,19 @@ public class FacultyView extends VerticalLayout {
         }catch(Exception e){
             Notification.show(e.getLocalizedMessage());
         }
-
     }
 
-    private void configureGrid(Grid<FacultyEntry> grid) {
-        grid.getColumnByKey("facultyCode").setHeader("Faculty Code");
-        grid.getColumnByKey("facultyName").setHeader("Faculty Name");
+    private void configureGrid(Grid<BatchEntry> grid) {
+        grid.getColumnByKey("batchNo").setHeader("Batch No");
+        grid.getColumnByKey("batchCode").setHeader("Batch Code");
+        grid.getColumnByKey("batchName").setHeader("Batch Name");
+        grid.getColumnByKey("year").setHeader("Year");
+        grid.getColumnByKey("specialization").setHeader("Specialization");
 
-        grid.setSizeFull();
+        //grid.setSizeFull();
+        grid.setHeightByRows(true);
 
-        grid.getColumns().forEach(col -> col.setWidth("300px"));
+        grid.getColumns().forEach(col -> col.setAutoWidth(true));
         grid.setSortableColumns();
 
         //Add Value Change Listener to display the form
@@ -143,20 +158,22 @@ public class FacultyView extends VerticalLayout {
 
     }
 
-    private void editForm(FacultyEntry value) {
-        if(value == null){
+    private void editForm(BatchEntry value) {
+        if(value==null){
             closeEditor();
         }else{
             form.setVisible(true);
-            addClassName("faculty-editing");
-            form.setInformation(value);
+            form.setInformation(value,1);
+            addClassName("batch-editing");
+
         }
     }
 
     private void closeEditor() {
         form.setVisible(false);
-        removeClassName("faculty-editing");
+        removeClassName("batch-editing");
     }
+
 
 
 }
