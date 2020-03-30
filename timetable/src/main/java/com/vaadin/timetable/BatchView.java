@@ -12,7 +12,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.timetable.backend.BatchEntry;
-import com.vaadin.timetable.backend.CourseEntry;
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;

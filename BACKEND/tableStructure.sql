@@ -72,6 +72,23 @@ desc weekTimetable;
 show tables;
 desc hall;
 
+show tables;
+desc weekTimetable;
+
+-- Adding unique values in weekTimetable table to prevent overlapping of slots ..
+alter  table weekTimetable
+add unique key(slotNo,batchNo,dayNo);
+
+alter  table weekTimetable
+add unique key(slotNo,dayNo,hallNo);
+
+-- Adding auto increment to serial no in weekTimetable table
+select * from weekTimetable; 
+
+desc weekTimetable;
+
+alter table weekTimetable change Sno Sno int(5) auto_increment;
+
 
 
 

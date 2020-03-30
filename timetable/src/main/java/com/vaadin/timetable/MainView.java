@@ -20,6 +20,11 @@ import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.PWA;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.vaadin.stefan.fullcalendar.Entry;
+import org.vaadin.stefan.fullcalendar.FullCalendar;
+import org.vaadin.stefan.fullcalendar.FullCalendarBuilder;
+
+import java.time.LocalDate;
 
 
 @Route("")
@@ -29,7 +34,6 @@ public class MainView extends AppLayout {
     public MainView(){
         createHeader();
         createDrawer();
-
     }
 
     private void createDrawer() {

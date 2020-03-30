@@ -1,6 +1,5 @@
 package com.vaadin.timetable;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -14,14 +13,12 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.timetable.backend.BatchEntry;
-import com.vaadin.timetable.backend.FacultyEntry;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 import java.time.Year;
 
-import static com.vaadin.flow.component.Key.FN;
 
 
 public class BatchInformationForm extends VerticalLayout {
