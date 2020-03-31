@@ -4,6 +4,7 @@ import com.vaadin.flow.component.grid.ItemClickEvent;
 
 public class TableEntry {
 
+   private int Day;
    private String SLOT_I = "";
    private String SLOT_II = "";
    private String SLOT_III = "";
@@ -14,7 +15,7 @@ public class TableEntry {
    private String SLOT_VIII = "";
    private String SLOT_IX = "";
 
-   public String getSLOT_I(){
+    public String getSLOT_I(){
        return SLOT_I;
    }
 
@@ -87,6 +88,7 @@ public class TableEntry {
     }
 
 
+
     public String getSlot(ItemClickEvent<TableEntry> evt, String slot) {
        if(slot.equals("SLOT_I")){
            return evt.getItem().getSLOT_I();
@@ -116,5 +118,13 @@ public class TableEntry {
            return evt.getItem().getSLOT_IX();
        }
 
+    }
+
+    public int getDay() {
+        return Day;
+    }
+
+    public void setDay(int day) {
+        Day = day;
     }
 }

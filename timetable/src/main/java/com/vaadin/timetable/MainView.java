@@ -56,7 +56,6 @@ public class MainView extends AppLayout {
         header.setWidth("90%");
         header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
 
-
         addToNavbar(header,username);
     }
 

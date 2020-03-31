@@ -18,6 +18,9 @@ import com.vaadin.flow.component.textfield.TextField;
 
 public class SlotInformationForm extends VerticalLayout {
     H2 heading  = new H2("Course Information");
+    public int slotNo;
+    public int batchNo;
+    public int dayNo;
     TextField courseCode = new TextField("Course Code");
     TextField courseName = new TextField("Course Name");
     TextField faculty = new TextField("Faculty InCharge");
