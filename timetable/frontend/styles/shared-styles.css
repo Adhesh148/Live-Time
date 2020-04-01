@@ -49,3 +49,9 @@
 .batch-list .batch-content{
     display:flex;
 }
+
+.timetable-grid .v-grid-body .v-grid-cell {
+    line-height: 18px;     // adjust to your needs
+    font-size: 10px;       // adjust to your needs
+    font-color: blue;
+}

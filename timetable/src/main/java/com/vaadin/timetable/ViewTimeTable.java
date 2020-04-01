@@ -1,12 +1,10 @@
 package com.vaadin.timetable;
 
 import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.H2;
@@ -22,15 +20,16 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.timetable.backend.TableEntry;
 
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
+
 
 @PageTitle("ViewTimeTable | Timetable")
 @Route(value = "view",layout = MainView.class)
@@ -53,10 +52,10 @@ public class ViewTimeTable extends VerticalLayout {
 
         grid = new Grid<>(TableEntry.class);
         configureGrid(grid);
+        grid.addClassName("timetable-grid");
 
         comboBox.addValueChangeListener(valueChangeEvent -> {
             fillGrid(grid, (String) comboBox.getValue());
-            //test.setText((String) comboBox.getValue());
         });
 
         HorizontalLayout toolbar = new HorizontalLayout(comboBox, addNew, delete);
@@ -81,6 +80,7 @@ public class ViewTimeTable extends VerticalLayout {
 
         });
         add(toolbar, grid, form);
+
     }
 
     private void deleteSlot() {
@@ -496,12 +496,26 @@ public class ViewTimeTable extends VerticalLayout {
             batchNo = rs.getInt("batchNo");
             rs.close();
             //get facultyCode
-            sql = "select facultyCode,hallNo from weekTimetable where batchNo="+batchNo+" and slotNo ="+slotNo+" and courseCode = '"+courseCode+"';";
+            sql = "select facultyCode,hallNo from weekTimetable where batchNo="+batchNo+" and slotNo ="+slotNo+" and courseCode = '"+courseCode+"' and dayNo ="+evt.getItem().getDay()+";";
             rs = stmt.executeQuery(sql);
-            rs.next();
-            facultyCode = rs.getString("facultyCode");
-            hallNo = rs.getString("hallNo");
-            rs.close();
+            if(rs.next()){
+                facultyCode = rs.getString("facultyCode");
+                hallNo = rs.getString("hallNo");
+                rs.close();
+            }else{
+                rs.close();
+                Calendar cal  = Calendar.getInstance();
+                cal.set(Calendar.DAY_OF_WEEK,evt.getItem().getDay()+1);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String Date = sdf.format(cal.getTime());
+                sql = "select facultyCode,hallNo from updateTimetable where batchNo="+batchNo+" and slotNo ="+slotNo+" and courseCode = '"+courseCode+"' and date = '"+Date+"';";
+                rs =stmt.executeQuery(sql);
+                rs.next();
+                facultyCode = rs.getString("facultyCode");
+                hallNo = rs.getString("hallNo");
+                rs.close();
+            }
+
             //get facultyName
             sql = "Select facultyName from faculty where facultyCode='"+facultyCode+"';";
             rs = stmt.executeQuery(sql);
@@ -597,11 +611,60 @@ public class ViewTimeTable extends VerticalLayout {
 
             }
             //Notification.show("IN");
+            fillGridSchedule(grid,batchInfo,time);
             grid.setItems(time[0],time[1],time[2],time[3],time[4]);
 
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
+    }
+
+    private void fillGridSchedule(Grid<TableEntry> grid, String batchInfo, TableEntry[] time) {
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(url,user,pwd);
+            Statement stmt = con.createStatement();
+            ResultSet rs;
+            String sql;
+
+            // Update grid with values from current week. So get date and date of weekend
+            LocalDate today = LocalDate.now();
+            Calendar cal  = Calendar.getInstance();
+            cal.set(Calendar.DAY_OF_WEEK,Calendar.FRIDAY);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            String friday[] =  sdf.format(cal.getTime()).split("-");
+
+            //get batchCode and year from batchInfo
+            String batch[] = batchInfo.split(" ");
+
+            //Get Batch Number corresponding to the batchCode and year
+            sql = "select batchNo from batch where batchCode ='"+batch[0]+"' and year = '"+batch[1]+"';";
+            rs = stmt.executeQuery(sql);
+            rs.next();
+            int batchNo = rs.getInt("batchNo");
+            rs.close();
+
+            // Call sql to update ones with S flag
+            int days =1;
+            while(days<=5){
+               Calendar dayDate = Calendar.getInstance();
+               dayDate.set(Calendar.DAY_OF_WEEK,days+1);
+               String Date = sdf.format(dayDate.getTime());
+               sql = "select courseCode,slotNo from updateTimetable where batchNo = "+batchNo+" and date ='"+Date+"' order by slotNo asc;";
+               rs = stmt.executeQuery(sql);
+               int slotNo;
+               while(rs.next()){
+                   slotNo = rs.getInt("slotNo");
+                   setSlot(slotNo,time[days-1],rs,1);
+               }
+               rs.close();
+               days++;
+            }
+
+        }catch (Exception e){
+            Notification.show(e.getLocalizedMessage());
+        }
+
     }
 
     private void setSlot(int iter, TableEntry timetable, ResultSet rs,int flag) {
@@ -714,6 +777,7 @@ public class ViewTimeTable extends VerticalLayout {
         grid.getColumnByKey("SLOT_VII").setHeader("14:00 - 15:00");
         grid.getColumnByKey("SLOT_VIII").setHeader("15:00 - 16:00");
         grid.getColumnByKey("SLOT_IX").setHeader("16:00 - 17:00");
+
 
         grid.setHeightByRows(true);
         grid.setSortableColumns();
