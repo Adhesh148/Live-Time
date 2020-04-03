@@ -51,7 +51,7 @@ public class SlotInformationForm extends VerticalLayout {
         HorizontalLayout header = new HorizontalLayout();
         header.add(heading,schedule);
         header.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
-        schedule.getStyle().set("margin-left", "1200px");
+        //schedule.getStyle().set("margin-left", "800px");
         add(header);
         Div line = new Div();
         line.getStyle().set("width","100%").set("border-top","4px solid gainsboro");

@@ -41,7 +41,8 @@ public class MainView extends AppLayout {
         VerticalLayout db_children = new VerticalLayout();
         db_children.add(new RouterLink("Course",CourseView.class),new RouterLink("Faculty",FacultyView.class),new RouterLink("Batch",BatchView.class));
         accordion.add("Database",db_children);
-        addToDrawer(new VerticalLayout(new RouterLink("Dashboard",DashboardView.class),new RouterLink("Live View",ViewTimeTable.class),accordion));
+        addToDrawer(new VerticalLayout(new RouterLink("Dashboard",DashboardView.class),new RouterLink("Live View",ViewTimeTable.class),
+                new RouterLink("Project",ProjectView.class),accordion));
     }
 
     private void createHeader() {

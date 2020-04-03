@@ -55,3 +55,28 @@
     font-size: 10px;       // adjust to your needs
     font-color: blue;
 }
+
+.project-create{
+    background-color:darkgreen;
+     border: none;
+     color: white;
+     border-radius: 25px;
+     //margin-left: 400px;
+}
+
+.project-delete{
+    background-color:red;
+     border: none;
+     color: white;
+     border-radius: 25px;
+}
+
+.project-panel{
+    display: flex;
+    flex-wrap: wrap;
+    flex: 1;
+}
+.project-add-heading{
+    font-weight : bold;
+    font-size: 1.7em;
+}
