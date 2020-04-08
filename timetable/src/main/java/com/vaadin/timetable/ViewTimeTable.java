@@ -20,6 +20,12 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.timetable.backend.TableEntry;
 
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -29,12 +35,12 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Properties;
 
 
 @PageTitle("ViewTimeTable | Timetable")
 @Route(value = "view",layout = MainView.class)
 public class ViewTimeTable extends VerticalLayout {
-
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
     String pwd = "Password_123";
@@ -42,10 +48,44 @@ public class ViewTimeTable extends VerticalLayout {
     SlotInformationForm form = new SlotInformationForm();
     ComboBox comboBox = new ComboBox();
 
+
+
     Icon addNew = new Icon(VaadinIcon.PLUS_CIRCLE);
     Icon delete = new Icon(VaadinIcon.MINUS_CIRCLE);
 
+
+
     public ViewTimeTable() {
+        //Test----------------- Email .. Successful
+        /*
+        String username = "adhesh100@gmail.com";
+        String password = "******";
+        Properties prop = new Properties();
+        prop.put("mail.smtp.auth","true");
+        prop.put("mail.smtp.starttls.enable","true");
+        prop.put("mail.smtp.host","smtp.gmail.com");
+        prop.put("mail.smtp.port","587");
+        try {
+        Session session = Session.getInstance(prop,
+                new javax.mail.Authenticator(){
+                    protected PasswordAuthentication getPasswordAuthentication(){
+                        return new PasswordAuthentication(username,password);
+                    }
+                });
+
+
+            Message msg = new MimeMessage(session);
+            msg.setFrom(new InternetAddress(username, false));
+            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse("reghu.mukesh@gmail.com"));
+            msg.setSubject("TEST TEST");
+            msg.setContent("This is a test", "text/html");
+
+            Transport.send(msg);
+        }catch (Exception e){
+            Notification.show(e.getLocalizedMessage());
+        }
+        */
+        //-----------------------------
 
         configureComboBox(comboBox);
         updateComboBox(comboBox);
@@ -293,13 +333,14 @@ public class ViewTimeTable extends VerticalLayout {
             facultyCode = rs.getString("facultyCode");
             rs.close();
 
-            boolean rst;
+            int rst;
             //Insert data for all the given slots
             while((fromSlotNo)<=(toSlotNo)){
                 sql = "insert into weekTimetable (batchNo,slotNo,courseCode,facultyCode,hallNo,dayNo) values("+batchNo+","+fromSlotNo+",'"+ courseCode.getValue() +"','"+facultyCode+"','"+venue.getValue()+"',"+dayNo+");";
-                rst = stmt.execute(sql);
-                if(rst == false)
-                    Notification.show("Slot successfully inserted",2000, Notification.Position.MIDDLE);
+                rst = stmt.executeUpdate(sql);
+                if(rst > 0) {
+                    Notification.show("Slot successfully inserted", 2000, Notification.Position.MIDDLE);
+                }
                 else
                     Notification.show("Insertion unsuccessful");
                 rs.close();
