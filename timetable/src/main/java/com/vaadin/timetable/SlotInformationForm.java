@@ -16,6 +16,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.timetable.Service.EmailService;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -25,6 +26,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.List;
 
 public class SlotInformationForm extends VerticalLayout {
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
@@ -203,8 +205,15 @@ public class SlotInformationForm extends VerticalLayout {
                 while(fromSlotNo<=toSlotNo){
                     sql = "insert into updateTimetable (batchNo,slotNo,courseCode,facultyCode,hallNo,date,flag) values("+batchNo+","+fromSlotNo+",'"+courseCode.getValue()+"','"+facultyCode+"','"+venue.getValue()+"','"+Date+"','S');";
                     rst = stmt.executeUpdate(sql);
-                    if(rst>0)
-                        Notification.show("Slot successfully scheduled",2000, Notification.Position.MIDDLE);
+                    if(rst>0) {
+                        Notification.show("Slot successfully scheduled", 2000, Notification.Position.MIDDLE);
+                        EmailBean emailBean = new EmailBean();
+                        emailBean.setTo("adheshreghu@gmail.com");
+                        emailBean.setBody(courseCode.getValue()+" has been scheduled on "+Date+" at slotNo: "+fromSlotNo+" in hall "+venue.getValue()+".");
+                        emailBean.setSubject("A CLASS HAS BEEN SCHEDULED.");
+                        emailBean.setCc("coe18b001@iiitdm.ac.in,coe18b003@iiitdm.ac.in,coe18b004@iiitdm.ac.in,coe18b005@iiitdm.ac.in,coe18b006@iiitdm.ac.in");
+                        EmailService emailService = new EmailService(emailBean);
+                    }
                     else
                         Notification.show("Scheduling unsuccessful");
                     fromSlotNo++;

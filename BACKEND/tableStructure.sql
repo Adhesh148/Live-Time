@@ -50,6 +50,8 @@ batchName varchar(70) not null,
 `year` year, 
 specialization varchar(50));
 
+alter table batch add unique key(batchCode);
+
 desc batch;
 
 create table weekTimetable(
@@ -88,6 +90,44 @@ select * from weekTimetable;
 desc weekTimetable;
 
 alter table weekTimetable change Sno Sno int(5) auto_increment;
+
+use liveTimetable;
+
+create table projectAssign(
+Sno int(40) primary key auto_increment,
+postedDate date not null,
+courseCode varchar(12) not null,
+facultyCode varchar(5) not null,
+title varchar(2000),
+description varchar(10000),
+batchNo int(3) not null,
+marks int(4),
+dueDate date,
+dueTime time,
+topic varchar(1000),
+foreign key(batchNo) references batch(batchNo),
+foreign key(courseCode) references course(courseCode),
+foreign key(facultyCode) references faculty(facultyCode));
+
+alter table projectAssign change Sno Sno int(40) auto_increment;
+
+
+desc projectAssign;
+
+-- Create a new table to store blob attachments of the projects
+create table attachment(
+Sno int(40) primary key auto_increment,
+Pno int(40) not null,
+attach BLOB,
+foreign key(Pno) references projectAssign(Sno));
+
+insert into attachment (Pno) values(1);
+select last_insert_id() as auto;
+
+select * from attachment;
+
+
+
 
 
 

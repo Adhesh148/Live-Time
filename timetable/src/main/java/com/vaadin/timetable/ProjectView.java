@@ -1,5 +1,6 @@
 package com.vaadin.timetable;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -15,13 +16,15 @@ import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
+import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import java.io.File;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.io.FileInputStream;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -56,18 +59,19 @@ public class ProjectView extends VerticalLayout {
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
             ResultSet rs;
-            String sql = "select postedDate,facultyCode,title,description,batchCode,marks,dueDate,dueTime from projectAssign;";
+            String sql = "select postedDate,courseCode,facultyCode,title,description,batchNo,marks,dueDate,dueTime from projectAssign;";
             rs = stmt.executeQuery(sql);
             while(rs.next()){
+                String courseCode = rs.getString("courseCode");
                 String postedDate = rs.getString("postedDate");
                 String facultyCode = rs.getString("facultyCode");
                 String title = rs.getString("title");
                 String desc = rs.getString("description");
-                String batch = rs.getString("batchCode");
+                String batchNo = String.valueOf(rs.getInt("batchNo"));
                 int marks = rs.getInt("marks");
                 String dueDate = rs.getString("dueDate");
                 String dueTime = rs.getString("dueTime");
-                ProjectPanel panel = new ProjectPanel(postedDate,facultyCode,title,desc,batch,marks,dueDate,dueTime);
+                ProjectPanel panel = new ProjectPanel(postedDate,courseCode,facultyCode,title,desc,batchNo,marks,dueDate,dueTime);
                 add(panel);
             }
         }catch (Exception e){
@@ -118,9 +122,14 @@ public class ProjectView extends VerticalLayout {
         desc.setPlaceholder("Enter description. (Optional)");
         teamSize.setPlaceholder("Enter Size of Team");
         Button assign = new Button("Assign",VaadinIcon.PLUS.create());
+        // Add Upload Button------------------------
+        // Simple in memory single file upload.
+        MemoryBuffer buffer = new MemoryBuffer();
+        Upload upload = new Upload(buffer);
+        //--------------------------------------
 
         VerticalLayout innerSecondaryLayout = new VerticalLayout();
-        innerSecondaryLayout.add(title,desc,assign);
+        innerSecondaryLayout.add(title,desc,upload,assign);
         inner_layout.addToPrimary(innerSecondaryLayout);
         inner_layout.addToSecondary(outerSecondaryLayout);
         outer_layout.addToPrimary(heading);
@@ -222,7 +231,7 @@ public class ProjectView extends VerticalLayout {
         deadlineDate.setMax(today.plusMonths(6));
         //Add Functionality to AssignButton
         assign.addClickListener(buttonClickEvent -> {
-            insertNewProject(title,desc,facultyCode,courseCode,batch,marks,deadlineDate,deadlineTime,topic,teamSize);
+            insertNewProject(title,desc,facultyCode,courseCode,batch,marks,deadlineDate,deadlineTime,topic,teamSize,upload,buffer);
             project.close();
         });
 
@@ -232,20 +241,48 @@ public class ProjectView extends VerticalLayout {
 
     }
 
-    private void insertNewProject(TextField title, TextArea desc, ComboBox facultyCode, ComboBox courseCode, ComboBox batch, TextField marks, DatePicker deadlineDate, TimePicker deadlineTime, TextField topic, TextField teamSize) {
+    private void insertNewProject(TextField title, TextArea desc, ComboBox facultyCode, ComboBox courseCode, ComboBox batch, TextField marks, DatePicker deadlineDate, TimePicker deadlineTime, TextField topic, TextField teamSize, Upload upload, MemoryBuffer buffer) {
         try{
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
 
+            // Let us extract batchNo from batch
+            String batchInfo[] = String.valueOf(batch.getValue()).split(" ");
+            String sql1 = "select batchNo from batch where batchCode = '"+batchInfo[0]+"' and year = '"+batchInfo[1]+"';";
+            ResultSet rst = stmt.executeQuery(sql1);
+            rst.next();
+            int batchNo = rst.getInt("batchNo");
+            rst.close();
+
+            //Insert into projectAssign table
             Calendar cal = Calendar.getInstance();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String postDate = sdf.format(cal.getTime());
-            String sql = "insert into projectAssign (postedDate,facultyCode,title,description,batchCode,marks,dueDate,dueTime,topic) values('"+postDate+"','"+facultyCode.getValue()+"','"+title.getValue()+"','"+desc.getValue()+"','"+batch.getValue()+"',"+marks.getValue()+",'"+deadlineDate.getValue()+"','"+deadlineTime.getValue()+"','"+topic.getValue()+"');";
+            String sql = "insert into projectAssign (postedDate,courseCode,facultyCode,title,description,batchNo,marks,dueDate,dueTime,topic) \n" +
+                    " values('"+postDate+"','"+courseCode.getValue()+"','"+facultyCode.getValue()+"','"+title.getValue()+"','"+desc.getValue()+"',\n" +
+                    ""+batchNo+","+marks.getValue()+",'"+deadlineDate.getValue()+"',\n" +
+                    "'"+deadlineTime.getValue()+"','"+topic.getValue()+"');";
             int rs;
             rs = stmt.executeUpdate(sql);
-            if(rs>0)
-                Notification.show("Successfully Inserted",2000, Notification.Position.MIDDLE);
+            if(rs>0) {
+                Notification.show("Successfully Inserted", 2000, Notification.Position.MIDDLE);
+                // Now we have to insert attachment to attachment table
+                //First Let us insert data without attachment into attachment table
+                String sqlA = "select Sno from projectAssign where postedDate ='"+postDate+"'and courseCode = '"+courseCode.getValue()+"' and title = '"+title.getValue()+"' and facultyCode='"+facultyCode.getValue()+"' and batchNo = "+batchNo+";";
+                Statement stmtA = con.createStatement();
+                ResultSet rstA = stmtA.executeQuery(sqlA);
+                rstA.next();
+                int Pno = rstA.getInt("Sno");
+                rstA.close();
+                PreparedStatement pStmt= null;
+                String sqlB = "insert into attachment (Pno,attach) values(?,?);";
+                pStmt = con.prepareStatement(sqlB);
+                pStmt.setInt(1,Pno);
+                pStmt.setBinaryStream(2,buffer.getInputStream());
+                pStmt.executeUpdate();
+                Notification.show("Attachment Successfully inserted.",2000, Notification.Position.MIDDLE);
+            }
             else
                 Notification.show("Insertion unsuccessful.",2000, Notification.Position.MIDDLE);
         }catch (Exception e){

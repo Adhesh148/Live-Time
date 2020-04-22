@@ -1,9 +1,12 @@
 package com.vaadin.timetable;
 
+import java.util.List;
+
 public class EmailBean {
     private String to ="";
     private String subject ="";
     private String body ="";
+    private String cc ="";
 
     public String getTo(){
         return to;
@@ -27,5 +30,13 @@ public class EmailBean {
 
     public void setBody(String body){
         this.body = body;
+    }
+
+    public String getCc() {
+        return cc;
+    }
+
+    public void setCc(String cc) {
+        this.cc = cc;
     }
 }

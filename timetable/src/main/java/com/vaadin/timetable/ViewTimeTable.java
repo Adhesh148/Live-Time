@@ -18,6 +18,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import com.vaadin.timetable.Service.EmailService;
 import com.vaadin.timetable.backend.TableEntry;
 
 import javax.mail.Message;
@@ -31,7 +32,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -48,43 +51,16 @@ public class ViewTimeTable extends VerticalLayout {
     SlotInformationForm form = new SlotInformationForm();
     ComboBox comboBox = new ComboBox();
 
-
-
     Icon addNew = new Icon(VaadinIcon.PLUS_CIRCLE);
     Icon delete = new Icon(VaadinIcon.MINUS_CIRCLE);
 
-
-
     public ViewTimeTable() {
         //Test----------------- Email .. Successful
-        /*
-        String username = "adhesh100@gmail.com";
-        String password = "******";
-        Properties prop = new Properties();
-        prop.put("mail.smtp.auth","true");
-        prop.put("mail.smtp.starttls.enable","true");
-        prop.put("mail.smtp.host","smtp.gmail.com");
-        prop.put("mail.smtp.port","587");
-        try {
-        Session session = Session.getInstance(prop,
-                new javax.mail.Authenticator(){
-                    protected PasswordAuthentication getPasswordAuthentication(){
-                        return new PasswordAuthentication(username,password);
-                    }
-                });
-
-
-            Message msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(username, false));
-            msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse("reghu.mukesh@gmail.com"));
-            msg.setSubject("TEST TEST");
-            msg.setContent("This is a test", "text/html");
-
-            Transport.send(msg);
-        }catch (Exception e){
-            Notification.show(e.getLocalizedMessage());
-        }
-        */
+//        EmailBean emailBean = new EmailBean();
+//        emailBean.setTo("adheshreghu@gmail.com");
+//        emailBean.setBody("This is a test message");
+//        emailBean.setSubject("TEST SERVICE");
+//        EmailService emailService = new EmailService(emailBean);
         //-----------------------------
 
         configureComboBox(comboBox);
@@ -169,13 +145,24 @@ public class ViewTimeTable extends VerticalLayout {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
+            Statement stmt1 = con.createStatement();
             int rs;
             String sql = "delete from weekTimetable where slotNo = "+slotNo+" and batchNo ="+batchNo+" and courseCode = '"+courseCode+"' and dayNo = "+dayNo+";";
             rs = stmt.executeUpdate(sql);
             if(rs>0)
                 Notification.show("Row successfully deleted.",2000, Notification.Position.MIDDLE);
-            else
-                Notification.show("Delete unsuccessful",2000, Notification.Position.MIDDLE);
+            else {
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.DAY_OF_WEEK,dayNo+1);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String Date = sdf.format(cal.getTime());
+                String sql1 = "delete from updateTimetable where slotNo = "+slotNo+" and batchNo = "+batchNo+" and courseCode = '"+courseCode+"' and date = '"+Date+"';";
+                int rst = stmt1.executeUpdate(sql1);
+                if(rst>0)
+                    Notification.show("Row successfully deleted.",2000, Notification.Position.MIDDLE);
+                else
+                    Notification.show("Delete unsuccessful", 2000, Notification.Position.MIDDLE);
+            }
 
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
