@@ -10,7 +10,7 @@ import java.util.Calendar;
 
 
 @PageTitle("Dashboard | Timetable")
-@Route(value = "dashbaord",layout = MainView.class)
+@Route(value = "dashboard",layout = MainView.class)
 
 
 public class DashboardView extends VerticalLayout {

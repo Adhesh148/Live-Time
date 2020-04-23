@@ -2,6 +2,7 @@ package com.vaadin.timetable;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -35,20 +36,17 @@ import java.util.Collection;
 @Route(value = "project",layout = MainView.class)
 public class ProjectView extends VerticalLayout {
     Button create = new Button("Create", VaadinIcon.PLUS.create());
-    Button delete = new Button("Delete",VaadinIcon.MINUS.create());
 
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
     String pwd = "Password_123";
 
-
     public ProjectView(){
         create.addClassName("project-create");
-        delete.addClassName("project-delete");
         create.addClickListener(buttonClickEvent -> {
             addNewProject();
         });
-        add(new HorizontalLayout(create,delete));
+        add(new HorizontalLayout(create));
 
         updateProjectPanels();
     }
@@ -282,6 +280,8 @@ public class ProjectView extends VerticalLayout {
                 pStmt.setBinaryStream(2,buffer.getInputStream());
                 pStmt.executeUpdate();
                 Notification.show("Attachment Successfully inserted.",2000, Notification.Position.MIDDLE);
+                // reload, can think of another way.
+                UI.getCurrent().getPage().reload();
             }
             else
                 Notification.show("Insertion unsuccessful.",2000, Notification.Position.MIDDLE);
