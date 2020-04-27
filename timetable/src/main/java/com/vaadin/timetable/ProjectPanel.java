@@ -1,7 +1,5 @@
 package com.vaadin.timetable;
 
-import com.flowingcode.vaadin.addons.ironicons.ImageIcons;
-import com.helger.commons.http.HttpHeaderMap;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
@@ -9,7 +7,6 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -23,22 +20,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import com.vaadin.flow.server.StreamResource;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
-
-import javax.imageio.ImageIO;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletResponseWrapper;
-import javax.xml.transform.stream.StreamSource;
-import java.awt.image.BufferedImage;
 
 import java.io.*;
 import java.sql.*;
@@ -111,24 +92,35 @@ public class ProjectPanel extends VerticalLayout {
             if(rs.next()){
                 InputStream is = rs.getBinaryStream("attach");
                 String format = rs.getString("format");
-                OutputStream os = new FileOutputStream("/home/adheshreghu/Documents/SEM4/MYSQL/"+fileName+"."+format);
+                //OutputStream os = new FileOutputStream("/home/adheshreghu/Documents/SEM4/MYSQL/"+fileName+"."+format);
 
                 // Download from browser
+                //FacesContext facesContext = FacesContext.getCurrentInstance();
+                //HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
+
+               // response.reset();
+                //response.setContentType("application/pdf");
+                //response.setHeader("Content-disposition", "attachment; filename=\"download.pdf\"");
+                //OutputStream os = response.getOutputStream();
+
+
+                //HttpServletResponse response;
                 //HttpServletResponse response ;
                 //response.setHeader("Content-Disposition", "attachment; filename=download.jpg");
                 //response.setContentType("application/jpg");
                 //OutputStream os = response.getOutputStream();
 
-                byte[] buffer = new byte[1024];
-                int bytesRead;
-                // read from is to buffer
-                while((bytesRead = is.read(buffer))!=-1){
-                    os.write(buffer,0,bytesRead);
-                }
-                is.close();
-                os.flush();
-                os.close();
-                Notification.show("File Generated: "+fileName);
+//                byte[] buffer = new byte[10240];
+//                int bytesRead;
+//                // read from is to buffer
+//                while((bytesRead = is.read(buffer))!=-1){
+//                    os.write(buffer,0,bytesRead);
+//                }
+//                is.close();
+//                os.flush();
+//                os.close();
+//                //facesContext.responseComplete();
+//                Notification.show("File Generated: "+fileName);
             }
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
