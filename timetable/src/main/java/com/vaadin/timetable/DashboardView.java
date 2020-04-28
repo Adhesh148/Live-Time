@@ -12,6 +12,8 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.timetable.backend.CourseEntry;
 import com.vaadin.timetable.backend.DashboardProjectGrid;
 import com.vaadin.timetable.backend.DashboardScheduleGrid;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.vaadin.stefan.fullcalendar.FullCalendar;
 import org.vaadin.stefan.fullcalendar.FullCalendarBuilder;
 
@@ -26,8 +28,6 @@ import java.util.Collection;
 
 @PageTitle("Dashboard | Timetable")
 @Route(value = "dashboard",layout = MainView.class)
-
-
 public class DashboardView extends VerticalLayout {
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
@@ -62,6 +62,16 @@ public class DashboardView extends VerticalLayout {
         configureProjectGrid();
         fillProjectGrid();
         add(new VerticalLayout(grid_2,projectGrid));
+
+        //get Currently logged in user
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            String username = ((UserDetails)principal).getUsername();
+            Notification.show(username,2000, Notification.Position.MIDDLE);
+        } else {
+            String username = principal.toString();
+        }
 
 
     }
