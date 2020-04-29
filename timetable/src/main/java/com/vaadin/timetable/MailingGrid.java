@@ -45,8 +45,6 @@ public class MailingGrid extends VerticalLayout {
     TextField filterText = new TextField();
     MailingListForm form = new MailingListForm();
 
-    Button notify = new Button("Notify");
-
     public MailingGrid(){
         setClassName("course-list");
         setSizeFull();
@@ -60,7 +58,7 @@ public class MailingGrid extends VerticalLayout {
 
         form.setVisible(false);
 
-        HorizontalLayout toolBar = new HorizontalLayout(filterText,addNew,addImport,notify);
+        HorizontalLayout toolBar = new HorizontalLayout(filterText,addNew,addImport);
        toolBar.setAlignSelf(Alignment.CENTER, addNew);
 
         addNew.addClickListener(evt -> {
@@ -72,10 +70,6 @@ public class MailingGrid extends VerticalLayout {
         });
 
         add(toolBar,content);
-
-        notify.addClickListener(buttonClickEvent -> {
-            new MailingDialog();
-        });
 
     }
 

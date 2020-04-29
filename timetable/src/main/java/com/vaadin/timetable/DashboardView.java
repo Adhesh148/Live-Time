@@ -68,7 +68,6 @@ public class DashboardView extends VerticalLayout {
 
         if (principal instanceof UserDetails) {
             String username = ((UserDetails)principal).getUsername();
-            Notification.show(username,2000, Notification.Position.MIDDLE);
         } else {
             String username = principal.toString();
         }

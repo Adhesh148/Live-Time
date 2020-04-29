@@ -6,10 +6,13 @@ import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.details.DetailsVariant;
-import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -49,11 +52,10 @@ public class MainView extends AppLayout {
     }
 
     private void createDrawer(String role) {
-
         if(role.equals("ADMIN")) {
             Accordion accordion = new Accordion();
             VerticalLayout db_children = new VerticalLayout();
-            db_children.add(new RouterLink("Course", CourseView.class), new RouterLink("Faculty", FacultyView.class), new RouterLink("Batch", BatchView.class),new RouterLink("Mailing List",MailingGrid.class));
+            db_children.add(new RouterLink("Course", CourseView.class), new RouterLink("Faculty", FacultyView.class), new RouterLink("Batch", BatchView.class),new RouterLink("Mailing List",MailingGrid.class  ));
             accordion.add("Database", db_children);
             addToDrawer(new VerticalLayout(new RouterLink("Dashboard", DashboardView.class), new RouterLink("Live View", ViewTimeTable.class),
                     new RouterLink("Project", ProjectView.class), accordion));
@@ -69,12 +71,20 @@ public class MainView extends AppLayout {
         Label username = new Label("Hello "+userName);
         username.addClassName("username");
 
+        MenuBar menuBar = new MenuBar();
+        MenuItem user = menuBar.addItem(new Icon(VaadinIcon.USER));
+        Label name = new Label("Hi "+userName);
+        name.addClassName("setVisible");
+        user.getSubMenu().addItem(name).setEnabled(false);
+        user.getSubMenu().add(new Hr());
+        user.getSubMenu().addItem("Edit Personal Info");
+        user.getSubMenu().addItem(new Anchor("/logout","Sign Out"));
         HorizontalLayout header =  new HorizontalLayout(new DrawerToggle(),logo);
         header.addClassName("header");
-        header.setWidth("90%");
+        header.setWidth("95%");
         header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
 
-        addToNavbar(header,username);
+        addToNavbar(header,menuBar);
     }
 
 
