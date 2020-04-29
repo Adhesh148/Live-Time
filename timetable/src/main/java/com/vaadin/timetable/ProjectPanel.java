@@ -14,14 +14,23 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.*;
 
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -93,38 +102,14 @@ public class ProjectPanel extends VerticalLayout {
                 InputStream is = rs.getBinaryStream("attach");
                 String format = rs.getString("format");
                 //OutputStream os = new FileOutputStream("/home/adheshreghu/Documents/SEM4/MYSQL/"+fileName+"."+format);
-
-                // Download from browser
-                //FacesContext facesContext = FacesContext.getCurrentInstance();
-                //HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
-
-               // response.reset();
-                //response.setContentType("application/pdf");
-                //response.setHeader("Content-disposition", "attachment; filename=\"download.pdf\"");
-                //OutputStream os = response.getOutputStream();
-
-
-                //HttpServletResponse response;
-                //HttpServletResponse response ;
-                //response.setHeader("Content-Disposition", "attachment; filename=download.jpg");
-                //response.setContentType("application/jpg");
-                //OutputStream os = response.getOutputStream();
-
-//                byte[] buffer = new byte[10240];
-//                int bytesRead;
-//                // read from is to buffer
-//                while((bytesRead = is.read(buffer))!=-1){
-//                    os.write(buffer,0,bytesRead);
-//                }
-//                is.close();
-//                os.flush();
-//                os.close();
-//                //facesContext.responseComplete();
-//                Notification.show("File Generated: "+fileName);
             }
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
+    }
+
+    private void download(InputStream is) throws IOException {
+
     }
 
 

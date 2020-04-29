@@ -2,6 +2,7 @@ package com.vaadin.timetable;
 
 import com.flowingcode.vaadin.addons.ironicons.IronIcons;
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -10,6 +11,8 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -217,6 +220,10 @@ public class SlotInformationForm extends VerticalLayout {
             LocalDate today = LocalDate.now();
             LocalDate Date = date.getValue();
             LocalDate MAX_BOUND = LocalDate.now().plusMonths(2);
+
+            //Will be used to while sending email
+            int fromSlot = fromSlotNo;
+
             if(((Date.isAfter(today) || Date.isEqual(today)) && (Date.isBefore(MAX_BOUND))) && (validateScheduledClass(batchNo,fromSlotNo,toSlotNo,venue.getValue(),Date) == 1)){
                 int rst;
                 while(fromSlotNo<=toSlotNo){
@@ -224,23 +231,40 @@ public class SlotInformationForm extends VerticalLayout {
                     rst = stmt.executeUpdate(sql);
                     if(rst>0) {
                         Notification.show("Slot successfully scheduled", 2000, Notification.Position.MIDDLE);
-                        EmailBean emailBean = new EmailBean();
-                        emailBean.setTo("adheshreghu@gmail.com");
-                        emailBean.setBody(courseCode.getValue()+" has been scheduled on "+Date+" at slotNo: "+fromSlotNo+" in hall "+venue.getValue()+".");
-                        emailBean.setSubject("A CLASS HAS BEEN SCHEDULED.");
-                        emailBean.setCc("coe18b001@iiitdm.ac.in,coe18b003@iiitdm.ac.in,coe18b004@iiitdm.ac.in,coe18b005@iiitdm.ac.in,coe18b006@iiitdm.ac.in");
-                        EmailService emailService = new EmailService(emailBean);
+                        // Calling the email Service
                     }
                     else
                         Notification.show("Scheduling unsuccessful");
                     fromSlotNo++;
                 }
+                OpenAskNotifyDialog(Date,courseCode.getValue(),fromSlot,toSlotNo,batchNo,venue.getValue());
             }else
                 throw new ArithmeticException("Enter proper date");
 
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
+    }
+
+    private void OpenAskNotifyDialog(LocalDate date, Object courseCode, int fromSlot, int toSlotNo, int batchNo, Object venue) {
+        Dialog dialog = new Dialog();
+        H4 header = new H4("Do you want to Notify?");
+        Label message = new Label("Notify Students/TAs about the update/cancellation.");
+        Button yes = new Button("YES");
+        Button no = new Button("NO");
+        dialog.add(new VerticalLayout(header,message,new HorizontalLayout(yes,no)));
+        dialog.open();
+
+        no.addClickListener(evt->{
+            dialog.close();
+            UI.getCurrent().getPage().reload();
+        });
+        yes.addClickListener(evt->{
+           String flag = "S";
+           new MailingDialog(flag,courseCode,date,fromSlot,toSlotNo,batchNo,venue);
+           dialog.close();
+           UI.getCurrent().getPage().reload();
+        });
     }
 
     private int validateScheduledClass(int batchNo, int fromSlotNo, int toSlotNo, Object hallNo, LocalDate date) {
