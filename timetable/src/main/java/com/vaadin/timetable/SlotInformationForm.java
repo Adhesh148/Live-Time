@@ -257,13 +257,13 @@ public class SlotInformationForm extends VerticalLayout {
 
         no.addClickListener(evt->{
             dialog.close();
-            UI.getCurrent().getPage().reload();
+           // UI.getCurrent().getPage().reload();
         });
         yes.addClickListener(evt->{
            String flag = "S";
            new MailingDialog(flag,courseCode,date,fromSlot,toSlotNo,batchNo,venue);
            dialog.close();
-           UI.getCurrent().getPage().reload();
+          // UI.getCurrent().getPage().reload();
         });
     }
 

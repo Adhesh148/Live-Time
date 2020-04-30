@@ -24,6 +24,7 @@ public class MyUserDetails implements UserDetails {
     private String userName;
     private String password;
     private boolean active;
+    private int batchNo;
     private List<GrantedAuthority> authorities;
 
     public MyUserDetails(String userName){
@@ -33,11 +34,12 @@ public class MyUserDetails implements UserDetails {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
-            String sql = "select password,active,roles from user where userName = '"+userName+"';";
+            String sql = "select password,active,roles,batchNo from user where userName = '"+userName+"';";
             ResultSet rs = stmt.executeQuery(sql);
             rs.next();
             this.password = rs.getString("password");
             this.active = rs.getBoolean("active");
+            this.batchNo = rs.getInt("batchNo");
             this.authorities = Arrays.stream(rs.getString("roles").split(",")).map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
         }catch (Exception e){
@@ -79,5 +81,14 @@ public class MyUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return active;
+    }
+
+
+    public int getBatchNo() {
+        return batchNo;
+    }
+
+    public void setBatchNo(int batchNo) {
+        this.batchNo = batchNo;
     }
 }

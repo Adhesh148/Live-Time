@@ -10,6 +10,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.timetable.backend.TableEntry;
+import com.vaadin.timetable.security.MyUserDetails;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -33,6 +36,8 @@ public class StudentTimetable extends VerticalLayout {
     SlotInformationForm form = new SlotInformationForm(role);
     ComboBox comboBox = new ComboBox();
 
+
+
     public StudentTimetable() {
 
         configureComboBox(comboBox);
@@ -42,9 +47,20 @@ public class StudentTimetable extends VerticalLayout {
         configureGrid(grid);
         grid.addClassName("timetable-grid");
 
-        comboBox.addValueChangeListener(valueChangeEvent -> {
-            fillGrid(grid, (String) comboBox.getValue());
-        });
+        //get the batch of the student
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int batchNo=0;
+        if (principal instanceof UserDetails) {
+            batchNo = ((MyUserDetails) principal).getBatchNo();
+        }
+        String batchCode = "";
+        if(batchNo>0){
+            batchCode = getbatchCode(batchNo);
+        }
+
+        comboBox.setValue(batchCode);
+        fillGrid(grid, (String) comboBox.getValue());
+        comboBox.setEnabled(false);
 
         HorizontalLayout toolbar = new HorizontalLayout(comboBox);
 
@@ -56,6 +72,29 @@ public class StudentTimetable extends VerticalLayout {
         add(toolbar, grid, form);
 
     }
+
+    private String getbatchCode(int batchNo) {
+        String batchCode ="";
+        String year = "";
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(url,user,pwd);
+            Statement stmt = con.createStatement();
+            String sql = "select batchCode,year from batch where batchNo = "+batchNo+";";
+            ResultSet rs = stmt.executeQuery(sql);
+            if(rs.next()){
+                batchCode = rs.getString("batchCode");
+                year = rs.getString("year");
+                year = year.split("-")[0];
+            }
+
+        }catch (Exception e){
+            Notification.show(e.getLocalizedMessage());
+        }
+        String batch = batchCode+" "+year;
+        return batch;
+    }
+
 
 
     private void updateForm(ItemClickEvent<TableEntry> evt) {

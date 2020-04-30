@@ -15,6 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Autowired
+    private CustomAuthenticationSuccessHandler successHandler;
+
+    @Autowired
     UserDetailsService userDetailsService;
 
     @Override
@@ -29,7 +32,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.csrf().disable().authorizeRequests()
                 .anyRequest().authenticated()
                 .and()
-                .formLogin();
+                .formLogin().defaultSuccessUrl("/").successHandler(successHandler);
     }
 
 

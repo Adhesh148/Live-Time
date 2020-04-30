@@ -115,8 +115,10 @@ public class MailingDialog extends VerticalLayout {
 
             ResultSet rs = stmt.executeQuery(sql);
             String emailid = "";
+            rs.next();
+            emailid = rs.getString("email");
             while (rs.next()){
-                emailid = emailid +" "+rs.getString("email");
+                emailid = emailid +","+rs.getString("email");
             }
             rs.close();
             EmailBean emailBean = new EmailBean();
