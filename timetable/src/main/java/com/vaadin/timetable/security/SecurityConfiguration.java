@@ -32,7 +32,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         http.csrf().disable().authorizeRequests()
                 .anyRequest().authenticated()
                 .and()
-                .formLogin().defaultSuccessUrl("/").successHandler(successHandler);
+                .formLogin()
+                .defaultSuccessUrl("/").successHandler(successHandler);
+
     }
 
 

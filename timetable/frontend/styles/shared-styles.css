@@ -129,6 +129,56 @@
 
 .setVisible{
     font-weight:bold;
-    color: red;
-
+    color: black;
 }
+
+.quote{
+    font-style:italic;
+}
+
+.guideline{
+    font-weight:bold;
+    font-size:1em;
+}
+
+.space-below{
+    padding-bottom: 25px;
+    width:300px
+}
+
+.bolden{
+font-weight:bold;
+}
+
+.userDetails-form{
+     margin-top: 25px;
+     padding-left: 30px;
+     padding-top: 40px;
+     border-width: thin 0.1em;
+     border-style: solid;
+     border-color:#E8E8E8;
+     border-radius: 10px;
+}
+
+.password-form{
+     margin-top: 25px;
+     padding-left: 30px;
+     padding-top: 40px;
+     border-width: thin 0.1em;
+     border-style: solid;
+     border-color:#E8E8E8;
+     border-radius: 10px;
+}
+
+.password-guideline{
+    padding-bottom: 25px;
+    width:300px
+    font-size:1.2em;
+    font-weight:bold;
+}
+
+.password-button{
+        padding-top:10px;
+}
+
+

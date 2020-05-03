@@ -72,7 +72,8 @@ public class MainView extends AppLayout {
             addToDrawer(new VerticalLayout(new RouterLink("Dashboard", DashboardView.class), new RouterLink("Live View", ViewTimeTable.class),
                     new RouterLink("Project", ProjectView.class), accordion));
         }else if(role.equals("USER")){
-            addToDrawer(new VerticalLayout(new RouterLink("Dashboard",DashboardView.class),new RouterLink("Live View",StudentTimetable.class)));
+            addToDrawer(new VerticalLayout(new RouterLink("Dashboard",DashboardView.class),new RouterLink("Live View",StudentTimetable.class),
+                    new RouterLink("Report",StudentReportView.class),new RouterLink("Edit Personal Info",EditPersonalInfo.class)));
         }
     }
 

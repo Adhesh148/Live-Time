@@ -99,7 +99,7 @@ public class StudentTimetable extends VerticalLayout {
 
     private void updateForm(ItemClickEvent<TableEntry> evt) {
         String slot = evt.getColumn().getKey();
-        String courseCode = evt.getItem().getSlot(evt,slot);
+        String courseCode = getCourseCode(evt.getItem().getSlot(evt,slot));
         String courseName,facultyName,hallNo,facultyCode;
         String[] requirements = new String[10];
         int iter =0;
@@ -168,6 +168,35 @@ public class StudentTimetable extends VerticalLayout {
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
+    }
+
+    private String getCourseCode(String courseCode) {
+        String CC = courseCode;
+        int userId = 0;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof MyUserDetails) {
+            userId = ((MyUserDetails) principal).getId();
+        }
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con  = DriverManager.getConnection(url,user,pwd);
+            Statement stmt = con.createStatement();
+            String sql = "select count(*) as cnt from course where courseCode = '"+courseCode+"';";
+            ResultSet rs = stmt.executeQuery(sql);
+            rs.next();
+            int cnt = rs.getInt("cnt");
+            rs.close();
+            if(cnt<=0){
+                String sqlA = "select courseCode from courseAbbreviation where abbrv ='"+courseCode+"' and userId = "+userId+";";
+                ResultSet rst = stmt.executeQuery(sqlA);
+                rst.next();
+                CC = rst.getString("courseCode");
+                rst.close();
+            }
+        }catch (Exception e){
+            Notification.show(e.getLocalizedMessage());
+        }
+        return CC;
     }
 
     private int getSlotNo(String slot) {
@@ -294,57 +323,62 @@ public class StudentTimetable extends VerticalLayout {
 
     private void setSlot(int iter, TableEntry timetable, ResultSet rs,int flag) {
         try{
+            String abbrv = getAbbrv(rs.getString("courseCode"));
+            String courseCode = rs.getString("courseCode");
+            if(!abbrv.equalsIgnoreCase(""))
+                courseCode = abbrv;
+
             if(iter == 1){
                 if(flag == 1)
-                    timetable.setSLOT_I(rs.getString("courseCode"));
+                    timetable.setSLOT_I(courseCode);
                 else
                     timetable.setSLOT_I("");
             }
             else if(iter == 2){
                 if(flag == 1)
-                    timetable.setSLOT_II(rs.getString("courseCode"));
+                    timetable.setSLOT_II(courseCode);
                 else
                     timetable.setSLOT_II("");
             }
             else if(iter == 3){
                 if(flag == 1)
-                    timetable.setSLOT_III(rs.getString("courseCode"));
+                    timetable.setSLOT_III(courseCode);
                 else
                     timetable.setSLOT_III("");
             }
             else if(iter == 4){
                 if(flag == 1)
-                    timetable.setSLOT_IV(rs.getString("courseCode"));
+                    timetable.setSLOT_IV(courseCode);
                 else
                     timetable.setSLOT_IV("");
             }
             else if(iter == 5){
                 if(flag == 1)
-                    timetable.setSLOT_V(rs.getString("courseCode"));
+                    timetable.setSLOT_V(courseCode);
                 else
                     timetable.setSLOT_V("");
             }
             else if(iter == 6){
                 if(flag == 1)
-                    timetable.setSLOT_VI(rs.getString("courseCode"));
+                    timetable.setSLOT_VI(courseCode);
                 else
                     timetable.setSLOT_VI("");
             }
             else if(iter == 7){
                 if(flag == 1)
-                    timetable.setSLOT_VII(rs.getString("courseCode"));
+                    timetable.setSLOT_VII(courseCode);
                 else
                     timetable.setSLOT_VII("");
             }
             else if(iter == 8){
                 if(flag == 1)
-                    timetable.setSLOT_VIII(rs.getString("courseCode"));
+                    timetable.setSLOT_VIII(courseCode);
                 else
                     timetable.setSLOT_VIII("");
             }
             else if(iter == 9){
                 if(flag == 1)
-                    timetable.setSLOT_IX(rs.getString("courseCode"));
+                    timetable.setSLOT_IX(courseCode);
                 else
                     timetable.setSLOT_IX("");
             }
@@ -352,6 +386,28 @@ public class StudentTimetable extends VerticalLayout {
             e.getLocalizedMessage();
         }
 
+    }
+
+    private String getAbbrv(String courseCode) {
+        String abbrv = "";
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(url, user, pwd);
+            Statement stmt = con.createStatement();
+            int userId = 0;
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            if (principal instanceof MyUserDetails) {
+                userId = ((MyUserDetails) principal).getId();
+            }
+            String sql = "select ifnull(abbrv,'') as abbrv from courseAbbreviation where userId = "+userId+" and courseCode = '"+courseCode+"';";
+            ResultSet rst = stmt.executeQuery(sql);
+            if(rst.next())
+                abbrv = rst.getString("abbrv");
+        }catch (Exception e){
+            Notification.show("NE");
+            Notification.show(e.getLocalizedMessage());
+        }
+        return  abbrv;
     }
 
     private void configureComboBox(ComboBox comboBox) {

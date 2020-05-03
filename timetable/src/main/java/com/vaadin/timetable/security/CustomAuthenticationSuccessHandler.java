@@ -20,6 +20,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -35,13 +36,14 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Authentication authentication) throws IOException, ServletException {
         //do some logic here if you want something to be done whenever
         //the user successfully logs in.
-
-
+        int userId=0;
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = "";
         if (principal instanceof UserDetails) {
-            username = ((UserDetails) principal).getUsername();
+            username = ((MyUserDetails) principal).getUsername();
+            userId =  ((MyUserDetails) principal).getId();
         }
+
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
@@ -50,7 +52,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             LocalDateTime myDateObj = LocalDateTime.now();
             DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             String datetime = myDateObj.format(myFormatObj);
-            String sql = "insert into userLog (userName,loginTime) values('"+username+"','"+datetime+"');";
+            String sql = "insert into userLog (userId,loginTime) values('"+userId+"','"+datetime+"');";
             int rs = stmt.executeUpdate(sql);
 //           UI.getCurrent().navigate("dashboard");
             redirectStrategy.sendRedirect(httpServletRequest,httpServletResponse,"/");

@@ -59,7 +59,7 @@ public class MailingGrid extends VerticalLayout {
         form.setVisible(false);
 
         HorizontalLayout toolBar = new HorizontalLayout(filterText,addNew,addImport);
-       toolBar.setAlignSelf(Alignment.CENTER, addNew);
+        toolBar.setAlignSelf(Alignment.CENTER, addNew);
 
         addNew.addClickListener(evt -> {
             addFaculty();
