@@ -20,6 +20,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @PageTitle("Report | Timetable | Student")
 @Route(value = "report",layout = MainView.class)
@@ -74,13 +77,16 @@ public class StudentReportView extends VerticalLayout {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
+            LocalDateTime myDateObj = LocalDateTime.now();
+            DateTimeFormatter myFormatObj = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String datetime = myDateObj.format(myFormatObj);
             String flag= "C";
             if(group.equalsIgnoreCase("Bug Reports"))
                 flag = "B";
             else if(group.equalsIgnoreCase("Question"))
                 flag = "Q";
 
-            String sql = "insert into report (userId,report,flag) values("+userId+",'"+feedback+"','"+flag+"')";
+            String sql = "insert into report (userId,report,flag,postedDate) values("+userId+",'"+feedback+"','"+flag+"','"+datetime+"')";
             int rs = stmt.executeUpdate(sql);
             if(rs>0)
                 Notification.show("Report Successfully Filed.",2000, Notification.Position.MIDDLE);

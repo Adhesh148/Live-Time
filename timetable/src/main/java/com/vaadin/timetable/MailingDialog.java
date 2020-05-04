@@ -66,7 +66,7 @@ public class MailingDialog extends VerticalLayout {
         Label message = new Label("Select the groups you wish to notify your message.");
         Label message2 = new Label("(Multiple groups can selected.)");
         TextArea personal = new TextArea("Enter Email Ids");
-        personal.setPlaceholder("Enter Email Ids not included in any group");
+        personal.setPlaceholder("Enter Email Ids not included in any group separated by comma");
         personal.setWidth("400px");
         Button cancel = new Button("Cancel");
         Button update = new Button("Notify");
@@ -91,7 +91,7 @@ public class MailingDialog extends VerticalLayout {
         update.addClickListener(buttonClickEvent -> {
             Set<String> hash_Set = listBox.getSelectedItems();
             ArrayList<String> selectedItems = new ArrayList<String >(hash_Set);
-            onScheduleNotify(selectedItems,date,courseCode,fromSlot,toSlotNo, batchNo,venue,dialog);
+            onScheduleNotify(selectedItems,date,courseCode,fromSlot,toSlotNo, batchNo,venue,dialog,personal.getValue());
         });
 
         dialog.setSizeFull();
@@ -99,7 +99,81 @@ public class MailingDialog extends VerticalLayout {
 
     }
 
-    private void onScheduleNotify(ArrayList<String> selectedItems, LocalDate date, Object courseCode, int fromSlot, int toSlotNo, int batchNo, Object venue, Dialog dialog) {
+    public  MailingDialog(String flag,int batchNo, int slotNo, String courseCode, String facultyName, String hall, String Date){
+        Dialog dialog = new Dialog();
+        H2 header = new H2("Notify");
+        Label message = new Label("Select the groups you wish to notify your message.");
+        Label message2 = new Label("(Multiple groups can selected.)");
+        TextArea personal = new TextArea("Enter Email Ids");
+        personal.setPlaceholder("Enter Email Ids not included in any group separated by comma");
+        personal.setWidth("400px");
+        Button cancel = new Button("Cancel");
+        Button update = new Button("Notify");
+
+        cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        update.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        // create a new List Box
+        MultiSelectListBox<String> listBox = new MultiSelectListBox<>();
+        ArrayList<String> groups = getAllGroups();
+        List<String> unique = new ArrayList<String>(new HashSet<String>(groups));
+        listBox.setHeight("60px");
+        listBox.setWidthFull();
+        listBox.setItems(unique);
+
+        dialog.add(new VerticalLayout(header,message,message2,listBox,personal,new HorizontalLayout(cancel,update)));
+
+        cancel.addClickListener(buttonClickEvent -> {
+            dialog.close();
+        });
+
+        update.addClickListener(buttonClickEvent -> {
+            Set<String> hash_Set = listBox.getSelectedItems();
+            ArrayList<String> selectedItems = new ArrayList<String >(hash_Set);
+            onCancelNotify(selectedItems,batchNo,slotNo,courseCode,facultyName,hall,Date,dialog,personal.getValue());
+        });
+
+        dialog.setSizeFull();
+        dialog.open();
+
+    }
+
+    private void onCancelNotify(ArrayList<String> selectedItems, int batchNo, int slotNo, String courseCode, String facultyName, String hall, String date, Dialog dialog, String CCmail) {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(url,user,pwd);
+            Statement stmt = con.createStatement();
+            String sql = "select distinct email from mailingList where";
+            int i=0;
+            while(i!=selectedItems.size()-1) {
+                sql = sql +" `group` like '%" + selectedItems.get(i++) + "%' or";
+            }
+            sql = sql+" `group` like '%" + selectedItems.get(i) + "%';";
+
+            ResultSet rs = stmt.executeQuery(sql);
+            String emailid = "";
+            rs.next();
+            emailid = rs.getString("email");
+            while (rs.next()){
+                emailid = emailid +","+rs.getString("email");
+            }
+            rs.close();
+            EmailBean emailBean = new EmailBean();
+            emailBean.setBody(courseCode+" by faculty: '"+facultyName+"' originally scheduled on "+date+" at slotNo: "+slotNo+"  in hall "+hall+" has been cancelled.");
+            emailBean.setSubject("A CLASS HAS BEEN CANCELLED.");
+            emailBean.setTo(emailid);
+            if(!CCmail.equalsIgnoreCase(""))
+                emailBean.setCc(CCmail);
+            EmailService emailService = new EmailService(emailBean);
+            Notification.show("Email Successfully Sent.",2000, Notification.Position.MIDDLE);
+            dialog.close();
+
+        }catch (Exception e){
+            Notification.show(e.getLocalizedMessage());
+        }
+    }
+
+    private void onScheduleNotify(ArrayList<String> selectedItems, LocalDate date, Object courseCode, int fromSlot, int toSlotNo, int batchNo, Object venue, Dialog dialog,String CCmail) {
 
         //get the emails from the groups
         try {
@@ -125,7 +199,8 @@ public class MailingDialog extends VerticalLayout {
             emailBean.setBody(courseCode+" has been scheduled on "+date+" at slotNo: "+fromSlot+" to slotNo: "+toSlotNo+" in hall "+venue+".");
             emailBean.setSubject("A CLASS HAS BEEN SCHEDULED.");
             emailBean.setTo(emailid);
-            //emailBean.setCc("coe18b001@iiitdm.ac.in,coe18b003@iiitdm.ac.in,coe18b004@iiitdm.ac.in,coe18b005@iiitdm.ac.in,coe18b006@iiitdm.ac.in");
+            if(!CCmail.equalsIgnoreCase(""))
+                emailBean.setCc(CCmail);
             EmailService emailService = new EmailService(emailBean);
             Notification.show("Email Successfully Sent.",2000, Notification.Position.MIDDLE);
             dialog.close();

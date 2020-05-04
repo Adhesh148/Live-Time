@@ -42,6 +42,8 @@ public class SlotInformationForm extends VerticalLayout {
     public int slotNo;
     public int batchNo;
     public int dayNo;
+    //gives date of selected Slot
+    public String slotDate;
     TextField courseCode = new TextField("Course Code");
     TextField courseName = new TextField("Course Name");
     TextField faculty = new TextField("Faculty InCharge");
@@ -49,14 +51,15 @@ public class SlotInformationForm extends VerticalLayout {
     TextArea requirements = new TextArea("Requirements");
 
     Button schedule = new Button("Schedule", IronIcons.SCHEDULE.create());
-    Button cancelSchedule = new Button();
+    Button cancelSchedule = new Button("Cancel");
 
 
 
     public SlotInformationForm(){
         addClassName("course-info-form");
         HorizontalLayout header = new HorizontalLayout();
-        header.add(heading,schedule);
+        cancelSchedule.addThemeVariants(ButtonVariant.LUMO_ERROR);
+        header.add(heading,schedule,cancelSchedule);
         header.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
         //schedule.getStyle().set("margin-left", "800px");
         add(header);
@@ -68,6 +71,121 @@ public class SlotInformationForm extends VerticalLayout {
         schedule.addClickListener(buttonClickEvent -> {
             scheduleSlot();
         });
+
+        cancelSchedule.addClickListener(buttonClickEvent -> {
+            if(!courseCode.getValue().equalsIgnoreCase("")) {
+                onCancel();
+            }
+        });
+    }
+
+    private void onCancel() {
+        Dialog dialog = new Dialog();
+        H4 header = new H4("Confirm Edit");
+        Label message = new Label("Are you sure you want to update the item?");
+        Button cancel = new Button("Close");
+        Button update = new Button("Cancel Class");
+
+        cancel.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        update.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+
+        FlexLayout UpdateButtonWrapper = new FlexLayout(update);
+        UpdateButtonWrapper.setJustifyContentMode(JustifyContentMode.END);
+
+        HorizontalLayout dialogButtons = new HorizontalLayout(cancel,UpdateButtonWrapper);
+        dialogButtons.expand(UpdateButtonWrapper);
+
+        dialog.add(new VerticalLayout(header,message),dialogButtons);
+        dialog.setWidth("400px");
+        dialog.setHeight("150px");
+        dialog.open();
+
+        update.addClickListener(evt -> {
+            cancelScheduleSlot();
+            dialog.close();
+            update.getUI().ifPresent(ui -> {ui.navigate("");});
+            update.getUI().ifPresent(ui -> {ui.navigate("view");});
+
+        });
+
+        cancel.addClickListener(evt -> {
+            dialog.close();
+        });
+    }
+
+    private void cancelScheduleSlot() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(url,user,pwd);
+            Statement stmt = con.createStatement();
+            String facultyCode = getFacultyCode(faculty.getValue());
+            //Notification.show(batchNo+" "+slotNo+" "+courseCode.getValue()+" "+faculty.getValue()+" "+venue.getValue()+" "+dayNo);
+            String sql = "select count(*) as cnt from weekTimetable where batchNo = "+batchNo+" and slotNo = "+slotNo+" and courseCode = '"+courseCode.getValue()+"' and facultyCode = '"+facultyCode+"' and hallNo = '"+venue.getValue()+"' and dayNo="+dayNo+";";
+            ResultSet rs = stmt.executeQuery(sql);
+            int cnt = 0;
+            if(rs.next())
+                cnt = rs.getInt("cnt");
+            rs.close();
+            if(cnt>0){
+                // Then the cancellation is on a week slot
+                String sqlA  = "insert into updateTimetable (batchNo,slotNo,courseCode,facultyCode,hallNo,date,flag) values("+batchNo+","+slotNo+",'"+courseCode.getValue()+"','"+facultyCode+"','"+venue.getValue()+"','"+slotDate+"','CW')";
+                int rst = stmt.executeUpdate(sqlA);
+                if(rst>0) {
+                    Notification.show("Class cancelled",2000, Notification.Position.MIDDLE);
+                    OpenAskNotifyDialogCancel(batchNo,slotNo,courseCode.getValue(),faculty.getValue(),venue.getValue(),slotDate);
+                }
+            }else{
+                String sqlA = "delete from updateTimetable where batchNo = "+batchNo+" and slotNo = "+slotNo+" and courseCode ='"+courseCode.getValue()+"' and facultyCode = '"+facultyCode+"' and hallNo = '"+venue.getValue()+"' and date = '"+slotDate+"' and flag = 'S';";
+                int rst = stmt.executeUpdate(sqlA);
+                if(rst>0) {
+                    Notification.show("Class cancelled",2000, Notification.Position.MIDDLE);
+                    OpenAskNotifyDialogCancel(batchNo,slotNo,courseCode.getValue(),faculty.getValue(),venue.getValue(),slotDate);
+                }
+            }
+            con.close();
+        }catch (Exception e) {
+            Notification.show(e.getLocalizedMessage());
+        }
+    }
+
+    private void OpenAskNotifyDialogCancel(int batchNo, int slotNo, String courseCode, String facultyName, String hall, String Date) {
+        Dialog dialog = new Dialog();
+        H4 header = new H4("Do you want to Notify?");
+        Label message = new Label("Notify Students/TAs about the update/cancellation.");
+        Button yes = new Button("YES");
+        Button no = new Button("NO");
+        dialog.add(new VerticalLayout(header,message,new HorizontalLayout(yes,no)));
+        dialog.open();
+
+        no.addClickListener(evt->{
+            dialog.close();
+            // UI.getCurrent().getPage().reload();
+        });
+        yes.addClickListener(evt->{
+            String flag = "C";
+            new MailingDialog(flag,batchNo,slotNo,courseCode,facultyName,hall,Date);
+            dialog.close();
+            // UI.getCurrent().getPage().reload();
+        });
+    }
+
+    private String getFacultyCode(String value) {
+        String facultyCode = "";
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(url,user,pwd);
+            Statement stmt = con.createStatement();
+            String sql = "select facultyCode from faculty where facultyName = '"+value+"';";
+            ResultSet rs = stmt.executeQuery(sql);
+            if(rs.next())
+                facultyCode = rs.getString("facultyCode");
+            rs.close();
+            con.close();
+        }catch (Exception e){
+            Notification.show(e.getLocalizedMessage());
+        }
+
+        return facultyCode;
     }
 
     public SlotInformationForm(String role) {
@@ -147,6 +265,7 @@ public class SlotInformationForm extends VerticalLayout {
                 rs = stmt.executeQuery(sql);
                 rs.next();
                 courseName.setValue(rs.getString("courseName"));
+                con.close();
             }catch (Exception e){
                 Notification.show(e.getLocalizedMessage());
             }
@@ -162,6 +281,7 @@ public class SlotInformationForm extends VerticalLayout {
                 rs = stmt.executeQuery(sql);
                 rs.next();
                 courseCode.setValue(rs.getString("courseCode"));
+                con.close();
             }catch (Exception e){
                 Notification.show(e.getLocalizedMessage());
             }
@@ -240,7 +360,7 @@ public class SlotInformationForm extends VerticalLayout {
                 OpenAskNotifyDialog(Date,courseCode.getValue(),fromSlot,toSlotNo,batchNo,venue.getValue());
             }else
                 throw new ArithmeticException("Enter proper date");
-
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -290,7 +410,7 @@ public class SlotInformationForm extends VerticalLayout {
                 items.add(entry);
             }
             venue.setItems(items);
-
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -310,6 +430,7 @@ public class SlotInformationForm extends VerticalLayout {
                 to_items.add(to_entry);
             }
             slotTo.setItems(to_items);
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -329,6 +450,7 @@ public class SlotInformationForm extends VerticalLayout {
                 from_items.add(from_entry);
             }
             slotFrom.setItems(from_items);
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -348,7 +470,7 @@ public class SlotInformationForm extends VerticalLayout {
                 items.add(entry);
             }
             faculty.setItems(items);
-
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -368,7 +490,7 @@ public class SlotInformationForm extends VerticalLayout {
                 items.add(entry);
             }
             courseName.setItems(items);
-
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -388,7 +510,7 @@ public class SlotInformationForm extends VerticalLayout {
                 items.add(entry);
             }
             courseCode.setItems(items);
-
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -412,7 +534,7 @@ public class SlotInformationForm extends VerticalLayout {
                 items.add(entry);
             }
             batchCode.setItems(items);
-
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }

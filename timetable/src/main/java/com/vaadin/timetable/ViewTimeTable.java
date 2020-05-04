@@ -4,6 +4,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.ItemClickEvent;
@@ -18,15 +19,9 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import com.vaadin.timetable.Service.EmailService;
+
 import com.vaadin.timetable.backend.TableEntry;
 
-import javax.mail.Message;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -35,10 +30,7 @@ import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Properties;
+import java.util.*;
 
 
 @PageTitle("ViewTimeTable | Timetable")
@@ -54,14 +46,9 @@ public class ViewTimeTable extends VerticalLayout {
     Icon addNew = new Icon(VaadinIcon.PLUS_CIRCLE);
     Icon delete = new Icon(VaadinIcon.MINUS_CIRCLE);
 
+    DatePicker datePicker = new DatePicker();
+
     public ViewTimeTable() {
-        //Test----------------- Email .. Successful
-//        EmailBean emailBean = new EmailBean();
-//        emailBean.setTo("adheshreghu@gmail.com");
-//        emailBean.setBody("This is a test message");
-//        emailBean.setSubject("TEST SERVICE");
-//        EmailService emailService = new EmailService(emailBean);
-        //-----------------------------
 
         configureComboBox(comboBox);
         updateComboBox(comboBox);
@@ -70,11 +57,19 @@ public class ViewTimeTable extends VerticalLayout {
         configureGrid(grid);
         grid.addClassName("timetable-grid");
 
+        // May have to get from comboBox instead of hardcoding
+        comboBox.setValue("COE 2018");
+        datePicker.addValueChangeListener(datePickerLocalDateComponentValueChangeEvent -> {
+            fillGrid(grid, (String) comboBox.getValue());
+        });
+        datePicker.setValue(LocalDate.now());
+        configureDatePicker();
+
         comboBox.addValueChangeListener(valueChangeEvent -> {
             fillGrid(grid, (String) comboBox.getValue());
         });
 
-        HorizontalLayout toolbar = new HorizontalLayout(comboBox, addNew, delete);
+        HorizontalLayout toolbar = new HorizontalLayout(comboBox,datePicker, addNew, delete);
         toolbar.setAlignSelf(Alignment.CENTER, addNew);
         toolbar.setAlignSelf(Alignment.CENTER, delete);
 
@@ -97,6 +92,21 @@ public class ViewTimeTable extends VerticalLayout {
         });
         add(toolbar, grid, form);
 
+    }
+
+    private void configureDatePicker() {
+        datePicker.setPlaceholder("Pick a Date");
+        datePicker.setWeekNumbersVisible(true);
+        datePicker.setI18n(new DatePicker.DatePickerI18n().setWeek("Week")
+                .setCalendar("Calendar").setClear("Clear").setToday("Today")
+                .setCancel("cancel").setFirstDayOfWeek(1)
+                .setMonthNames(Arrays.asList("January", "February", "March",
+                        "April", "May", "June", "July", "August", "September",
+                        "October", "November", "December"))
+                .setWeekdays(Arrays.asList("Sunday", "Monday", "Tuesday",
+                        "Wednesday", "Thursday", "Friday", "Saturday"))
+                .setWeekdaysShort(Arrays.asList("Sun", "Mon", "Tue", "Wed",
+                        "Thu", "Fri", "Sat")));
     }
 
     private void deleteSlot() {
@@ -163,7 +173,7 @@ public class ViewTimeTable extends VerticalLayout {
                 else
                     Notification.show("Delete unsuccessful", 2000, Notification.Position.MIDDLE);
             }
-
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -234,6 +244,8 @@ public class ViewTimeTable extends VerticalLayout {
                 rs = stmt.executeQuery(sql);
                 rs.next();
                 courseName.setValue(rs.getString("courseName"));
+                rs.close();
+                con.close();
             }catch (Exception e){
                 Notification.show(e.getLocalizedMessage());
             }
@@ -249,6 +261,8 @@ public class ViewTimeTable extends VerticalLayout {
                 rs = stmt.executeQuery(sql);
                 rs.next();
                 courseCode.setValue(rs.getString("courseCode"));
+                rs.close();
+                con.close();
             }catch (Exception e){
                 Notification.show(e.getLocalizedMessage());
             }
@@ -333,6 +347,7 @@ public class ViewTimeTable extends VerticalLayout {
                 rs.close();
                 fromSlotNo++;
             }
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -356,7 +371,8 @@ public class ViewTimeTable extends VerticalLayout {
                 items.add(entry);
             }
             batchCode.setItems(items);
-
+        rs.close();
+        con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -376,6 +392,8 @@ public class ViewTimeTable extends VerticalLayout {
                 items.add(entry);
             }
             day.setItems(items);
+            rs.close();
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -395,6 +413,8 @@ public class ViewTimeTable extends VerticalLayout {
                 to_items.add(to_entry);
             }
             slotTo.setItems(to_items);
+            rs.close();
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -414,6 +434,8 @@ public class ViewTimeTable extends VerticalLayout {
                 from_items.add(from_entry);
             }
             slotFrom.setItems(from_items);
+            rs.close();
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -434,7 +456,8 @@ public class ViewTimeTable extends VerticalLayout {
                 items.add(entry);
             }
             venue.setItems(items);
-
+            rs.close();
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -454,7 +477,8 @@ public class ViewTimeTable extends VerticalLayout {
                 items.add(entry);
             }
             faculty.setItems(items);
-
+            rs.close();
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -474,7 +498,8 @@ public class ViewTimeTable extends VerticalLayout {
                 items.add(entry);
             }
             courseName.setItems(items);
-
+            rs.close();
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -494,7 +519,8 @@ public class ViewTimeTable extends VerticalLayout {
                 items.add(entry);
             }
             courseCode.setItems(items);
-
+            rs.close();
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -503,73 +529,84 @@ public class ViewTimeTable extends VerticalLayout {
     private void updateForm(ItemClickEvent<TableEntry> evt) {
         String slot = evt.getColumn().getKey();
         String courseCode = evt.getItem().getSlot(evt,slot);
-        String courseName,facultyName,hallNo,facultyCode;
-        String[] requirements = new String[10];
-        int iter =0;
-        int slotNo = getSlotNo(slot);
-        int batchNo;
-        String batchInfo[] = String.valueOf(comboBox.getValue()).split(" ");
+        if(!courseCode.equalsIgnoreCase("")) {
+            String courseName, facultyName, hallNo, facultyCode;
+            String[] requirements = new String[10];
+            int iter = 0;
+            int slotNo = getSlotNo(slot);
+            int batchNo;
+            String batchInfo[] = String.valueOf(comboBox.getValue()).split(" ");
 
-        //Get Values of courseName,facultyName, hallNo from the backend
-        try{
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection(url,user,pwd);
-            Statement stmt = con.createStatement();
-            String sql;
-            ResultSet rs;
-            //get batch No
-            sql = "select batchNo from batch where batchCode ='"+batchInfo[0]+"' and year ='"+batchInfo[1]+"';";
-            rs = stmt.executeQuery(sql);
-            rs.next();
-            batchNo = rs.getInt("batchNo");
-            rs.close();
-            //get facultyCode
-            sql = "select facultyCode,hallNo from weekTimetable where batchNo="+batchNo+" and slotNo ="+slotNo+" and courseCode = '"+courseCode+"' and dayNo ="+evt.getItem().getDay()+";";
-            rs = stmt.executeQuery(sql);
-            if(rs.next()){
-                facultyCode = rs.getString("facultyCode");
-                hallNo = rs.getString("hallNo");
-                rs.close();
-            }else{
-                rs.close();
-                Calendar cal  = Calendar.getInstance();
-                cal.set(Calendar.DAY_OF_WEEK,evt.getItem().getDay()+1);
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                String Date = sdf.format(cal.getTime());
-                sql = "select facultyCode,hallNo from updateTimetable where batchNo="+batchNo+" and slotNo ="+slotNo+" and courseCode = '"+courseCode+"' and date = '"+Date+"';";
-                rs =stmt.executeQuery(sql);
+            //Get Values of courseName,facultyName, hallNo from the backend
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+                Connection con = DriverManager.getConnection(url, user, pwd);
+                Statement stmt = con.createStatement();
+                String sql;
+                ResultSet rs;
+                //get batch No
+                sql = "select batchNo from batch where batchCode ='" + batchInfo[0] + "' and year ='" + batchInfo[1] + "';";
+                rs = stmt.executeQuery(sql);
                 rs.next();
-                facultyCode = rs.getString("facultyCode");
-                hallNo = rs.getString("hallNo");
+                batchNo = rs.getInt("batchNo");
                 rs.close();
+                //get facultyCode
+                sql = "select facultyCode,hallNo from weekTimetable where batchNo=" + batchNo + " and slotNo =" + slotNo + " and courseCode = '" + courseCode + "' and dayNo =" + evt.getItem().getDay() + ";";
+                rs = stmt.executeQuery(sql);
+                if (rs.next()) {
+                    facultyCode = rs.getString("facultyCode");
+                    hallNo = rs.getString("hallNo");
+                    rs.close();
+                } else {
+                    rs.close();
+                    int dayNo = datePicker.getValue().getDayOfWeek().getValue();
+                    LocalDate dayDate = datePicker.getValue().plusDays((-1 * dayNo));
+                    dayDate = dayDate.plusDays(evt.getItem().getDay());
+                    String Date = dayDate.toString();
+                    sql = "select facultyCode,hallNo from updateTimetable where batchNo=" + batchNo + " and slotNo =" + slotNo + " and courseCode = '" + courseCode + "' and date = '" + Date + "';";
+                    rs = stmt.executeQuery(sql);
+                    rs.next();
+                    facultyCode = rs.getString("facultyCode");
+                    hallNo = rs.getString("hallNo");
+                    rs.close();
+                }
+
+                //get facultyName
+                sql = "Select facultyName from faculty where facultyCode='" + facultyCode + "';";
+                rs = stmt.executeQuery(sql);
+                rs.next();
+                facultyName = rs.getString("facultyName");
+                rs.close();
+                //get Course Name
+                sql = "select courseName from course where courseCode='" + courseCode + "';";
+                rs = stmt.executeQuery(sql);
+                rs.next();
+                courseName = rs.getString("courseName");
+                rs.close();
+
+                //Get the requirements of the course if any
+                sql = "select requirements from courseRequirements where courseCode = '" + courseCode + "'";
+                rs = stmt.executeQuery(sql);
+                while (rs.next()) {
+                    requirements[iter++] = rs.getString("requirements");
+                }
+                form.batchNo = batchNo;
+                form.slotNo = slotNo;
+                form.dayNo = evt.getItem().getDay();
+                int dayNo = datePicker.getValue().getDayOfWeek().getValue();
+                LocalDate dayDate = datePicker.getValue().plusDays((-1 * dayNo));
+                dayDate = dayDate.plusDays(evt.getItem().getDay());
+                form.slotDate = dayDate.toString();
+
+                form.setValues(courseCode, courseName, facultyName, hallNo, requirements, --iter);
+                rs.close();
+                con.close();
+
+            } catch (Exception e) {
+                Notification.show(e.getLocalizedMessage());
             }
-
-            //get facultyName
-            sql = "Select facultyName from faculty where facultyCode='"+facultyCode+"';";
-            rs = stmt.executeQuery(sql);
-            rs.next();
-            facultyName = rs.getString("facultyName");
-            rs.close();
-            //get Course Name
-            sql = "select courseName from course where courseCode='"+courseCode+"';";
-            rs = stmt.executeQuery(sql);
-            rs.next();
-            courseName = rs.getString("courseName");
-            rs.close();
-
-            //Get the requirements of the course if any
-            sql = "select requirements from courseRequirements where courseCode = '"+courseCode+"'";
-            rs = stmt.executeQuery(sql);
-            while(rs.next()){
-                requirements[iter++] = rs.getString("requirements");
-            }
-            form.batchNo = batchNo;
-            form.slotNo = slotNo;
-            form.dayNo = evt.getItem().getDay();
-
-            form.setValues(courseCode,courseName,facultyName,hallNo,requirements,--iter);
-        }catch (Exception e){
-            Notification.show(e.getLocalizedMessage());
+        }else {
+            form.setValues("","","","", new String[]{""},0);
         }
     }
 
@@ -626,11 +663,11 @@ public class ViewTimeTable extends VerticalLayout {
                 if(rs.next()) {
                     while (iter <= 9) {
                         if (rs.getInt("slotNo") == iter) {
-                            setSlot(iter++, time[days - 1], rs, 1);
+                            setSlot(iter++, time[days - 1], rs, 1,0);
                             if (!rs.isLast())
                                 rs.next();
                         } else {
-                            setSlot(iter++, time[days - 1], rs, 0);
+                            setSlot(iter++, time[days - 1], rs, 0,0);
                         }
                     }
                 }
@@ -641,7 +678,7 @@ public class ViewTimeTable extends VerticalLayout {
             //Notification.show("IN");
             fillGridSchedule(grid,batchInfo,time);
             grid.setItems(time[0],time[1],time[2],time[3],time[4]);
-
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -655,13 +692,6 @@ public class ViewTimeTable extends VerticalLayout {
             ResultSet rs;
             String sql;
 
-            // Update grid with values from current week. So get date and date of weekend
-            LocalDate today = LocalDate.now();
-            Calendar cal  = Calendar.getInstance();
-            cal.set(Calendar.DAY_OF_WEEK,Calendar.FRIDAY);
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-            String friday[] =  sdf.format(cal.getTime()).split("-");
-
             //get batchCode and year from batchInfo
             String batch[] = batchInfo.split(" ");
 
@@ -674,79 +704,83 @@ public class ViewTimeTable extends VerticalLayout {
 
             // Call sql to update ones with S flag
             int days =1;
+            int dayNo = datePicker.getValue().getDayOfWeek().getValue();
+            LocalDate dayDate = datePicker.getValue().plusDays((-1*dayNo));
             while(days<=5){
-               Calendar dayDate = Calendar.getInstance();
-               dayDate.set(Calendar.DAY_OF_WEEK,days+1);
-               String Date = sdf.format(dayDate.getTime());
-               sql = "select courseCode,slotNo from updateTimetable where batchNo = "+batchNo+" and date ='"+Date+"' order by slotNo asc;";
+               String Date = dayDate.plusDays(days).toString();
+               sql = "select courseCode,slotNo,flag from updateTimetable where batchNo = "+batchNo+" and date ='"+Date+"' order by slotNo asc;";
                rs = stmt.executeQuery(sql);
                int slotNo;
                while(rs.next()){
+                   String cancelFlag = rs.getString("flag");
+                   int cancelled = 1;
+                   if(cancelFlag.equalsIgnoreCase("S"))
+                       cancelled = 0;
                    slotNo = rs.getInt("slotNo");
-                   setSlot(slotNo,time[days-1],rs,1);
+                   setSlot(slotNo,time[days-1],rs,1,cancelled);
                }
                rs.close();
                days++;
             }
-
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
 
     }
 
-    private void setSlot(int iter, TableEntry timetable, ResultSet rs,int flag) {
+    private void setSlot(int iter, TableEntry timetable, ResultSet rs,int flag,int cancelled) {
         try{
             if(iter == 1){
-                if(flag == 1)
+                if(flag == 1 && cancelled==0)
                     timetable.setSLOT_I(rs.getString("courseCode"));
                 else
                     timetable.setSLOT_I("");
             }
             else if(iter == 2){
-                if(flag == 1)
+                if(flag == 1 && cancelled==0)
                     timetable.setSLOT_II(rs.getString("courseCode"));
                 else
                     timetable.setSLOT_II("");
             }
             else if(iter == 3){
-                if(flag == 1)
+                if(flag == 1 && cancelled==0)
                     timetable.setSLOT_III(rs.getString("courseCode"));
                 else
                     timetable.setSLOT_III("");
             }
             else if(iter == 4){
-                if(flag == 1)
+                if(flag == 1 && cancelled==0)
                     timetable.setSLOT_IV(rs.getString("courseCode"));
                 else
                     timetable.setSLOT_IV("");
             }
             else if(iter == 5){
-                if(flag == 1)
+                if(flag == 1 && cancelled==0)
                     timetable.setSLOT_V(rs.getString("courseCode"));
                 else
                     timetable.setSLOT_V("");
             }
             else if(iter == 6){
-                if(flag == 1)
+                if(flag == 1 && cancelled==0)
                     timetable.setSLOT_VI(rs.getString("courseCode"));
                 else
                     timetable.setSLOT_VI("");
             }
             else if(iter == 7){
-                if(flag == 1)
+                if(flag == 1 && cancelled==0)
                     timetable.setSLOT_VII(rs.getString("courseCode"));
                 else
                     timetable.setSLOT_VII("");
             }
             else if(iter == 8){
-                if(flag == 1)
+                if(flag == 1 && cancelled==0)
                     timetable.setSLOT_VIII(rs.getString("courseCode"));
                 else
                     timetable.setSLOT_VIII("");
             }
             else if(iter == 9){
-                if(flag == 1)
+                if(flag == 1 && cancelled==0)
                     timetable.setSLOT_IX(rs.getString("courseCode"));
                 else
                     timetable.setSLOT_IX("");
