@@ -126,11 +126,128 @@ select last_insert_id() as auto;
 
 select * from attachment;
 
+use liveTimetable;
 
+-- Changing structure of attachment table to store the format of the attachment as well.alter
+alter table attachment
+add `format` varchar(10);
 
+desc attachment;
 
+update attachment set `format` = "pdf" where Sno = 6; 
+update attachment set `format` = "jpg" where Sno = 5;
+update attachment set `format` = "png" where Sno = 4;
 
+use liveTimetable;
 
+create table mailingList(
+Sno int primary key auto_increment,
+name varchar(50) not null,
+email varchar(50) not null,
+`group` varchar(50));
 
+desc mailingList;
+
+insert into mailingList values(1,"Adhesh R","coe18b001@iiitdm.ac.in","COE18");
+
+select * from mailingList;
+
+alter table mailingList add unique(email);
+
+select distinct `group` from mailingList;
  
+select distinct email from mailingList where `group` like '%COE18%' or `group` like '%CED15%';
+
+desc batch;
+desc `user`;
+alter table `user` add column batchNo int(3);
+
+alter table user add
+foreign key(batchNo) references batch(batchNo);
+
+desc user;
+alter table user drop primary key;
+alter table user add primary key(userName);
+
+alter table user add unique(id);
+
+select * from user;
+
+insert into user values(3,1,"123","USER","COE18B001",1);
+
+alter table user
+alter batchNo drop default;
+
+alter table user
+add unique(userName);
+
+drop table userLog;
+
+create table userLog(
+loginId int(10) primary key auto_increment,
+userId int(11) not null,
+loginTime datetime not null,
+foreign key(userId) references user(id)
+);
+
+desc userLog;	
+
+select * from userLog;
+
+alter table userLog drop column logOutTime;
+
+insert into userLog (userName,loginTime) values('Adhesh','');
+
+use liveTimetable;
+
+desc user;
+
+alter table user drop primary key;
+alter table user add primary key(id);
+
+drop table report;
+
+create table report(
+id int(11) primary key auto_increment,
+userId int(11) not null,
+report varchar(10000) not null,
+flag char(2) not null,
+foreign key(userId) references user(id));
+
+desc report;
+
+select * from report;
+
+use liveTimetable;
+
+select * from user;	
+
+select * from report;
+
+alter table report add column postedDate datetime;
+
+select * from courseAbbreviation;
+
+use liveTimetable;
+
+select * from updateTimetable order by Date desc;
+
+select courseCode,slotNo from updateTimetable where batchNo = 1 and date = "2020-04-02" and flag = 'S' order by slotNo asc;
+
+select * from weekTimetable;
+
+select * from updateTimetable ;
+
+alter table updateTimetable add column postedDate date;
+
+select count(*) as cnt from updateTimetable where flag = "S" and postedDate >= "2020-05-04"and postedDate <= "2020-05-09";
+
+select count(*) as cnt from userLog where loginTime >= "2020-05-04"and loginTime <= "2020-05-09";
+
+alter table projectAssign add column teamSize int(11);
+
+
+select * from projectAssign;
+
+select * from attachment; 
 

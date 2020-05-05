@@ -21,9 +21,13 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import com.vaadin.flow.internal.StringUtil;
+import com.vaadin.flow.server.StreamResource;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.vaadin.olli.FileDownloadWrapper;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -42,6 +46,8 @@ public class ProjectPanel extends VerticalLayout {
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
     String pwd = "Password_123";
+    private int projectNo = 0;
+    private String downloadFormat = "";
 
     public ProjectPanel(String postedDate, String courseCode,String facultyCode, String title, String desc, String batch, int marks, String dueDate, String dueTime,int teamSize,String topic) {
 //        Accordion panel = new Accordion();
@@ -74,15 +80,27 @@ public class ProjectPanel extends VerticalLayout {
         Label attach = null;
         Button download = new Button("Download");
 
-        download.addClickListener(buttonClickEvent -> {
-            setAttachment(postedDate,courseCode,facultyCode,title,batch,marks,dueDate,dueTime);
-        });
+        ByteArrayInputStream inputStream = setAttachment(postedDate,courseCode,facultyCode,title,batch,marks,dueDate,dueTime);
+//        if(downloadFormat.equalsIgnoreCase("")){
+//            downloadFormat = "txt";
+//        }
+        FileDownloadWrapper buttonWrapper = new FileDownloadWrapper(
+                new StreamResource("download", () -> inputStream));
+        buttonWrapper.wrapComponent(download);
+
 
         //Add a delete button
         Button delete  = new Button("Delete",VaadinIcon.MINUS.create());
         Button edit  = new Button("Edit",VaadinIcon.EDIT.create());
 
-        add(titleLabel,subheading,new Hr(),description,new Hr(),new HorizontalLayout(delete,edit,download));
+        HorizontalLayout buttonLayout = new HorizontalLayout();
+        buttonLayout.add(delete,edit,buttonWrapper);
+
+        if(hasDownload(postedDate, courseCode, facultyCode, title, batch, marks, dueDate, dueTime) == 0){
+            buttonWrapper.setVisible(false);
+        }
+
+        add(titleLabel,subheading,new Hr(),description,new Hr(),buttonLayout);
 
 
         // Add Click Listeners
@@ -96,7 +114,36 @@ public class ProjectPanel extends VerticalLayout {
         });
     }
 
-    private void setAttachment(String postedDate, String courseCode, String facultyCode, String title, String batch, int marks, String dueDate, String dueTime) {
+    private int hasDownload(String postedDate, String courseCode, String facultyCode, String title, String batch, int marks, String dueDate, String dueTime) {
+        int flag = 0;
+        try {
+            // Have to work on this.
+            String fileName = "download";
+
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(url, user, pwd);
+            Statement stmt = con.createStatement();
+            // Get Pno
+            String sql = "select Sno from projectAssign where postedDate ='" + postedDate + "' and courseCode = '" + courseCode + "' and facultyCode = '" + facultyCode + "' and title ='" + title + "' and batchNo = '" + batch + "' and dueDate = '" + dueDate + "' and dueTime = '" + dueTime + "';";
+            ResultSet rs = stmt.executeQuery(sql);
+            rs.next();
+            int Pno = rs.getInt("Sno");
+            rs.close();
+            sql = "select count(*) as cnt from attachment where Pno = "+Pno+";";
+            rs = stmt.executeQuery(sql);
+            if(rs.next())
+                flag = rs.getInt("cnt");
+            rs.close();
+            con.close();
+        }catch (Exception e){
+            Notification.show(e.getLocalizedMessage());
+        }
+
+        return flag;
+    }
+
+    private ByteArrayInputStream setAttachment(String postedDate, String courseCode, String facultyCode, String title, String batch, int marks, String dueDate, String dueTime) {
+       ByteArrayInputStream is = null;
         try{
             // Have to work on this.
             String fileName = "download";
@@ -109,19 +156,22 @@ public class ProjectPanel extends VerticalLayout {
             ResultSet rs = stmt.executeQuery(sql);
             rs.next();
             int Pno = rs.getInt("Sno");
+            projectNo = Pno;
             rs.close();
 
             // get the blob
             String sqlA = "select attach,format from attachment  where Pno = "+Pno+";";
             rs = stmt.executeQuery(sqlA);
             if(rs.next()){
-                InputStream is = rs.getBinaryStream("attach");
+                    is = (ByteArrayInputStream) rs.getBinaryStream("attach");
                 String format = rs.getString("format");
+                downloadFormat = format;
                 //OutputStream os = new FileOutputStream("/home/adheshreghu/Documents/SEM4/MYSQL/"+fileName+"."+format);
             }
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
+        return is;
     }
 
 
