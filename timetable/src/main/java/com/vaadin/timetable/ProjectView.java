@@ -8,6 +8,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -40,6 +41,10 @@ public class ProjectView extends VerticalLayout {
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
     String pwd = "Password_123";
+    LocalDate today = LocalDate.now();
+    int dayOfWeek = today.getDayOfWeek().getValue();
+    LocalDate Sun = today.plusDays(-1*dayOfWeek);
+    LocalDate Sat = Sun.plusDays(6);
 
     public ProjectView(){
         create.addClassName("project-create");
@@ -57,7 +62,31 @@ public class ProjectView extends VerticalLayout {
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
             ResultSet rs;
-            String sql = "select postedDate,courseCode,facultyCode,title,description,batchNo,marks,dueDate,dueTime from projectAssign;";
+            String sql = "select postedDate,courseCode,facultyCode,title,description,batchNo,marks,dueDate,dueTime,teamSize,topic from projectAssign where postedDate>='"+Sun+"' and postedDate<='"+Sat+"' order by postedDate desc;";
+            rs = stmt.executeQuery(sql);
+            Label subhead = new Label("Posted this Week");
+            subhead.addClassName("project-division-headings");
+            add(new VerticalLayout(subhead,new Hr()));
+            while(rs.next()){
+                String courseCode = rs.getString("courseCode");
+                String postedDate = rs.getString("postedDate");
+                String facultyCode = rs.getString("facultyCode");
+                String title = rs.getString("title");
+                String desc = rs.getString("description");
+                String batchNo = String.valueOf(rs.getInt("batchNo"));
+                int marks = rs.getInt("marks");
+                String dueDate = rs.getString("dueDate");
+                String dueTime = rs.getString("dueTime");
+                int teamSize = rs.getInt("teamSize");
+                String topic = rs.getString("topic");
+                ProjectPanel panel = new ProjectPanel(postedDate,courseCode,facultyCode,title,desc,batchNo,marks,dueDate,dueTime,teamSize,topic);
+                add(panel);
+            }
+            rs.close();
+            Label subhead_older = new Label("Older Posts");
+            subhead_older.addClassName("project-division-headings");
+            add(new VerticalLayout(subhead_older,new Hr()));
+            sql = "select postedDate,courseCode,facultyCode,title,description,batchNo,marks,dueDate,dueTime,teamSize,topic from projectAssign where postedDate <'"+Sun+"' order by postedDate desc;";
             rs = stmt.executeQuery(sql);
             while(rs.next()){
                 String courseCode = rs.getString("courseCode");
@@ -69,9 +98,13 @@ public class ProjectView extends VerticalLayout {
                 int marks = rs.getInt("marks");
                 String dueDate = rs.getString("dueDate");
                 String dueTime = rs.getString("dueTime");
-                ProjectPanel panel = new ProjectPanel(postedDate,courseCode,facultyCode,title,desc,batchNo,marks,dueDate,dueTime);
+                int teamSize = rs.getInt("teamSize");
+                String topic = rs.getString("topic");
+                ProjectPanel panel = new ProjectPanel(postedDate,courseCode,facultyCode,title,desc,batchNo,marks,dueDate,dueTime,teamSize,topic);
                 add(panel);
             }
+            rs.close();
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -257,30 +290,32 @@ public class ProjectView extends VerticalLayout {
             Calendar cal = Calendar.getInstance();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String postDate = sdf.format(cal.getTime());
-            String sql = "insert into projectAssign (postedDate,courseCode,facultyCode,title,description,batchNo,marks,dueDate,dueTime,topic) \n" +
+            String sql = "insert into projectAssign (postedDate,courseCode,facultyCode,title,description,batchNo,marks,dueDate,dueTime,topic,teamSize) \n" +
                     " values('"+postDate+"','"+courseCode.getValue()+"','"+facultyCode.getValue()+"','"+title.getValue()+"','"+desc.getValue()+"',\n" +
                     ""+batchNo+","+marks.getValue()+",'"+deadlineDate.getValue()+"',\n" +
-                    "'"+deadlineTime.getValue()+"','"+topic.getValue()+"');";
+                    "'"+deadlineTime.getValue()+"','"+topic.getValue()+"',"+teamSize.getValue()+");";
             int rs;
             rs = stmt.executeUpdate(sql);
             if(rs>0) {
                 Notification.show("Successfully Inserted", 2000, Notification.Position.MIDDLE);
                 // Now we have to insert attachment to attachment table
                 //First Let us insert data without attachment into attachment table
-                String sqlA = "select Sno from projectAssign where postedDate ='"+postDate+"'and courseCode = '"+courseCode.getValue()+"' and title = '"+title.getValue()+"' and facultyCode='"+facultyCode.getValue()+"' and batchNo = "+batchNo+";";
-                Statement stmtA = con.createStatement();
-                ResultSet rstA = stmtA.executeQuery(sqlA);
-                rstA.next();
-                int Pno = rstA.getInt("Sno");
-                rstA.close();
-                PreparedStatement pStmt= null;
-                String sqlB = "insert into attachment (Pno,attach) values(?,?);";
-                pStmt = con.prepareStatement(sqlB);
-                pStmt.setInt(1,Pno);
-                pStmt.setBinaryStream(2,buffer.getInputStream());
-                pStmt.executeUpdate();
-                Notification.show("Attachment Successfully inserted.",2000, Notification.Position.MIDDLE);
-                // reload, can think of another way.
+                if(buffer.getInputStream().read()!=-1) {
+                    String sqlA = "select Sno from projectAssign where postedDate ='" + postDate + "'and courseCode = '" + courseCode.getValue() + "' and title = '" + title.getValue() + "' and facultyCode='" + facultyCode.getValue() + "' and batchNo = " + batchNo + ";";
+                    Statement stmtA = con.createStatement();
+                    ResultSet rstA = stmtA.executeQuery(sqlA);
+                    rstA.next();
+                    int Pno = rstA.getInt("Sno");
+                    rstA.close();
+                    PreparedStatement pStmt = null;
+                    String sqlB = "insert into attachment (Pno,attach) values(?,?);";
+                    pStmt = con.prepareStatement(sqlB);
+                    pStmt.setInt(1, Pno);
+                    pStmt.setBinaryStream(2, buffer.getInputStream());
+                    pStmt.executeUpdate();
+                    Notification.show("Attachment Successfully inserted.", 2000, Notification.Position.MIDDLE);
+                    // reload, can think of another way.
+                }
                 UI.getCurrent().getPage().reload();
             }
             else

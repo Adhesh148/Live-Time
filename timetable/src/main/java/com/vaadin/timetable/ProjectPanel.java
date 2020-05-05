@@ -1,39 +1,38 @@
 package com.vaadin.timetable;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.accordion.Accordion;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.Page;
 import com.vaadin.flow.component.splitlayout.SplitLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.*;
+import com.vaadin.flow.internal.StringUtil;
+import org.apache.commons.lang3.StringUtils;
 
-import javax.faces.context.ExternalContext;
-import javax.faces.context.FacesContext;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.sql.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -44,15 +43,32 @@ public class ProjectPanel extends VerticalLayout {
     String user = "dbms";
     String pwd = "Password_123";
 
-    public ProjectPanel(String postedDate, String courseCode,String facultyCode, String title, String desc, String batch, int marks, String dueDate, String dueTime) {
-        Accordion panel = new Accordion();
+    public ProjectPanel(String postedDate, String courseCode,String facultyCode, String title, String desc, String batch, int marks, String dueDate, String dueTime,int teamSize,String topic) {
+//        Accordion panel = new Accordion();
         addClassName("project-panel");
-        Label posted = new Label("Posted on");
-        posted.addClassName("bolden");
+        Label titleLabel  = new Label(title);
+        titleLabel.addClassName("title-project-panel");
+        String DueDate[] = dueDate.split("-");
+        String monthName = Month.of(Integer.parseInt(DueDate[1])).name();
+        monthName = monthName.toLowerCase();
+        monthName = StringUtils.capitalize(monthName);
+        Icon clipboard = new Icon(VaadinIcon.CLIPBOARD);
+        Icon circleIcon = new Icon(VaadinIcon.CIRCLE);
+        Icon circleIcon_dupl = new Icon(VaadinIcon.CIRCLE);
+        clipboard.getStyle().set("width","var(--iron-icon-width, 20px)");
+        circleIcon.getStyle().set("width","var(--iron-icon-width, 8px)");
+        circleIcon_dupl.getStyle().set("width","var(--iron-icon-width, 8px)");
+        Label message = new Label("Assignment Due "+monthName+" "+DueDate[2]+", "+DueDate[0]+" ");
+        Label point = new Label("Points: "+marks);
+        Label teams = new Label("Team Size: "+teamSize);
+        HorizontalLayout subheading;
+        if(teamSize == 0)
+            subheading = new HorizontalLayout(clipboard,message,circleIcon,point);
+        else
+            subheading = new HorizontalLayout(clipboard,message,circleIcon,point,circleIcon_dupl,teams);
         Label description = new Label(desc);
-        Label dueTitle = new Label("Deadline");
-        dueTitle.addClassName("bolden");
-        Label due = new Label(dueDate + " "+ dueTime);
+        description.getStyle().set("padding-bottom","15px");
+
 
         //get the the attachment from mysql
         Label attach = null;
@@ -65,9 +81,9 @@ public class ProjectPanel extends VerticalLayout {
         //Add a delete button
         Button delete  = new Button("Delete",VaadinIcon.MINUS.create());
         Button edit  = new Button("Edit",VaadinIcon.EDIT.create());
-        panel.add(title,new VerticalLayout(new HorizontalLayout(posted,new Label(postedDate)),new HorizontalLayout(dueTitle,due),description,new HorizontalLayout(delete,edit,download)));
-        panel.close();
-        add(panel);
+
+        add(titleLabel,subheading,new Hr(),description,new Hr(),new HorizontalLayout(delete,edit,download));
+
 
         // Add Click Listeners
         delete.addClickListener(evt -> {
@@ -76,7 +92,7 @@ public class ProjectPanel extends VerticalLayout {
         });
 
         edit.addClickListener(evt -> {
-            onEdit(postedDate,courseCode,facultyCode,title,desc,batch,marks,dueDate,dueTime);
+            onEdit(postedDate,courseCode,facultyCode,title,desc,batch,marks,dueDate,dueTime,teamSize,topic);
         });
     }
 
@@ -106,10 +122,6 @@ public class ProjectPanel extends VerticalLayout {
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
-    }
-
-    private void download(InputStream is) throws IOException {
-
     }
 
 
@@ -144,7 +156,7 @@ public class ProjectPanel extends VerticalLayout {
         });
     }
 
-    private void onEdit(String InppostedDate, String InpcourseCode, String InpfacultyCode, String Inptitle, String Inpdesc, String Inpbatch, int Inpmarks, String InpdueDate, String InpdueTime) {
+    private void onEdit(String InppostedDate, String InpcourseCode, String InpfacultyCode, String Inptitle, String InpDesc, String InpBatch, int Inpmarks, String InpdueDate, String InpdueTime,int InpTeamSize,String InpTopic) {
         Dialog project = new Dialog();
 
         SplitLayout outer_layout = new SplitLayout();
@@ -300,13 +312,16 @@ public class ProjectPanel extends VerticalLayout {
         courseCode.setValue(InpcourseCode);
         facultyCode.setValue(InpfacultyCode);
         title.setValue(Inptitle);
-        desc.setValue(Inpdesc);
+        desc.setValue(InpDesc);
         marks.setValue(String.valueOf(Inpmarks));
         deadlineDate.setValue(LocalDate.parse(InpdueDate));
         deadlineTime.setValue(LocalTime.parse(InpdueTime));
-
+        teamSize.setValue(String.valueOf(InpTeamSize));
+        topic.setValue(InpTopic);
+        batch.setValue(getBatchInfo(InpBatch));
         //add functionality to save button
         save.addClickListener(evt->{
+
 
         });
 
@@ -314,6 +329,27 @@ public class ProjectPanel extends VerticalLayout {
         project.add(outer_layout);
         project.open();
 
+    }
+
+    private String getBatchInfo(String inpBatch) {
+        int batchNo = Integer.parseInt(inpBatch);
+        String batchInfo = "";
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(url,user,pwd);
+            Statement stmt = con.createStatement();
+            String sql = "select batchCode,year from batch where batchNo = "+batchNo+";";
+            ResultSet rs = stmt.executeQuery(sql);
+            if(rs.next()){
+                batchInfo = rs.getString("batchCode")+" "+rs.getString("year").split("-")[0];
+            }
+            rs.close();
+            con.close();
+        }catch (Exception e){
+            Notification.show(e.getLocalizedMessage());
+        }
+
+        return batchInfo;
     }
 
     private void onDelete(String postedDate, String courseCode, String facultyCode, String title, String batch, String dueDate, String dueTime) {
@@ -339,7 +375,7 @@ public class ProjectPanel extends VerticalLayout {
                 Notification.show("Deletion successful",2000, Notification.Position.MIDDLE);
                 UI.getCurrent().getPage().reload();
             }
-
+            con.close();
         }catch(Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -362,7 +398,7 @@ public class ProjectPanel extends VerticalLayout {
                 items.add(entry);
             }
             batch.setItems(items);
-
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -383,6 +419,7 @@ public class ProjectPanel extends VerticalLayout {
                 items.add(entry);
             }
             courseName.setItems(items);
+            con.close();
         }catch(Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -403,6 +440,7 @@ public class ProjectPanel extends VerticalLayout {
                 items.add(entry);
             }
             courseCode.setItems(items);
+            con.close();
         }catch(Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -423,6 +461,7 @@ public class ProjectPanel extends VerticalLayout {
                 items.add(entry);
             }
             facultyName.setItems(items);
+            con.close();
         }catch(Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -443,6 +482,7 @@ public class ProjectPanel extends VerticalLayout {
                 items.add(entry);
             }
             facultyCode.setItems(items);
+            con.close();
         }catch(Exception e){
             Notification.show(e.getLocalizedMessage());
         }

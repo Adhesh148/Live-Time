@@ -10,6 +10,7 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.timetable.backend.DashboardProjectGrid;
 import com.vaadin.timetable.backend.DashboardScheduleGrid;
+import com.vaadin.timetable.security.MyUserDetails;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -21,10 +22,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 
-
-@PageTitle("Dashboard | Timetable")
-@Route(value = "dashboard",layout = MainView.class)
-public class DashboardView extends VerticalLayout {
+@PageTitle("Student Dashboard | Timetable")
+@Route(value = "student_dashboard",layout = MainView.class)
+public class StudentDashboard extends VerticalLayout {
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
     String pwd = "Password_123";
@@ -36,55 +36,51 @@ public class DashboardView extends VerticalLayout {
     Grid<DashboardScheduleGrid> scheduleGrid = new Grid<>(DashboardScheduleGrid.class);
     Grid<DashboardProjectGrid> projectGrid = new Grid<>(DashboardProjectGrid.class);
 
-    public DashboardView(){
+    public StudentDashboard(){
         H2 heading  = new H2("Dashboard");
         add(heading);
 
-        int[] classCount = getClassCount();
-        int visitors = getVisitorCount();
-        int projectCnt = getProjectCount();
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        int batchNo=0;
+        if (principal instanceof MyUserDetails) {
+            batchNo = ((MyUserDetails) principal).getBatchNo();
+        }
+
+        int[] classCount = getClassCount(batchNo);
+        int projectCnt = getProjectCount(batchNo);
         // Add three panels
         dashboardPanel panel1 = new dashboardPanel(classCount[0],"Classes Scheduled");
         dashboardPanel panel2 = new dashboardPanel(classCount[1],"Classes Cancelled");
-        dashboardPanel panel3 = new dashboardPanel(projectCnt,"Projects Assigned");
-        dashboardPanel panel4 = new dashboardPanel(visitors,"Visitors");
-        HorizontalLayout cards = new HorizontalLayout(panel1,panel2,panel3,panel4);
+        dashboardPanel panel3 = new dashboardPanel(projectCnt,"Projects Due");
+        HorizontalLayout cards = new HorizontalLayout(panel1,panel2,panel3);
         cards.addClassName("dashboard-card");
         add(cards);
 
         // Add two grids - scheduled/cancelled classes and projects assigned
 
         //First Grid
-        H4 grid_1 = new H4("Recent Schedules/Cancellations");
+        H4 grid_1 = new H4("Schedules/Cancellations This Week");
         configureScheduleGrid(scheduleGrid);
         fillScheduleGrid();
         add(new VerticalLayout(grid_1,scheduleGrid));
 
         //Second Grid
-        H4 grid_2 = new H4("Recent Projects");
+        H4 grid_2 = new H4("Projects Due This Week");
         configureProjectGrid();
         fillProjectGrid();
         add(new VerticalLayout(grid_2,projectGrid));
 
-        //get Currently logged in user
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        if (principal instanceof UserDetails) {
-            String username = ((UserDetails)principal).getUsername();
-        } else {
-            String username = principal.toString();
-        }
 
 
     }
 
-    private int getProjectCount() {
+    private int getProjectCount(int batchNo) {
         int projectCnt=0;
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
-            String sql = "select count(*) as cnt from projectAssign where postedDate >= '"+Sun.toString()+"' and postedDate <= '"+Sat.toString()+"';";
+            String sql = "select count(*) as cnt from projectAssign where postedDate >= '"+Sun.toString()+"' and postedDate <= '"+Sat.toString()+"' and batchNo = "+batchNo+";";
             ResultSet rs = stmt.executeQuery(sql);
             if(rs.next())
                 projectCnt = rs.getInt("cnt");
@@ -97,38 +93,19 @@ public class DashboardView extends VerticalLayout {
         return projectCnt;
     }
 
-    private int getVisitorCount() {
-        int visitorCnt=0;
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            Connection con = DriverManager.getConnection(url,user,pwd);
-            Statement stmt = con.createStatement();
-            String sql = "select count(*) as cnt from userLog where loginTime >= '"+Sun.toString()+"' and loginTime <= '"+Sat.toString()+"';";
-            ResultSet rs = stmt.executeQuery(sql);
-            if(rs.next())
-                visitorCnt = rs.getInt("cnt");
-            rs.close();
-            con.close();
-        }catch (Exception e){
-            Notification.show(e.getLocalizedMessage());
-        }
-
-        return visitorCnt;
-    }
-
-    private int[] getClassCount() {
+    private int[] getClassCount(int batchNo) {
         int[] classCount = new int[2];
-       // Notification.show(Sun.toString()+" "+Sat.toString());
+        // Notification.show(Sun.toString()+" "+Sat.toString());
         try {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
-            String sql = "select count(*) as cnt from updateTimetable where flag = 'S' and postedDate >= '"+ Sun.toString()+"' and postedDate <='"+Sat.toString()+"'";
+            String sql = "select count(*) as cnt from updateTimetable where flag = 'S' and date >= '"+ Sun.toString()+"' and date <='"+Sat.toString()+"' and batchNo = "+batchNo+";";
             ResultSet rs = stmt.executeQuery(sql);
             rs.next();
             classCount[0] = rs.getInt("cnt");
             rs.close();
-            sql = "select count(*) as cnt from updateTimetable where flag = 'CW' and postedDate >= '"+Sun.toString()+"' and postedDate <='"+Sat.toString()+"'";
+            sql = "select count(*) as cnt from updateTimetable where flag = 'CW' and date >= '"+Sun.toString()+"' and date <='"+Sat.toString()+"' and batchNo = "+batchNo+";";
             rs = stmt.executeQuery(sql);
             rs.next();
             classCount[1] = rs.getInt("cnt");
@@ -145,7 +122,7 @@ public class DashboardView extends VerticalLayout {
             Class.forName("com.mysql.jdbc.Driver");
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
-            String sql = "select Sno,postedDate,courseCode,facultyCode,title,batchNo,dueDate,dueTime from projectAssign where postedDate >='"+Sun.toString()+"' and postedDate <= '"+Sat.toString()+"' order by postedDate desc;";
+            String sql = "select Sno,postedDate,courseCode,facultyCode,title,batchNo,dueDate,dueTime from projectAssign where dueDate >='"+Sun.toString()+"' and dueDate <= '"+Sat.toString()+"' order by postedDate desc;";
             ResultSet rs = stmt.executeQuery(sql);
             Collection<DashboardProjectGrid> data = new ArrayList<>();
             while(rs.next()){
@@ -183,7 +160,7 @@ public class DashboardView extends VerticalLayout {
 
         projectGrid.setColumnOrder(projectGrid.getColumnByKey("pno"),projectGrid.getColumnByKey("date"),projectGrid.getColumnByKey("batch"),
                 projectGrid.getColumnByKey("courseCode"),projectGrid.getColumnByKey("faculty"),projectGrid.getColumnByKey("title"),projectGrid.getColumnByKey("due"));
-        
+
     }
 
     private void fillScheduleGrid() {
@@ -229,5 +206,4 @@ public class DashboardView extends VerticalLayout {
         scheduleGrid.setSortableColumns();
         scheduleGrid.setHeightByRows(true);
     }
-
 }

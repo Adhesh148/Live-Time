@@ -82,7 +82,7 @@ public class SlotInformationForm extends VerticalLayout {
     private void onCancel() {
         Dialog dialog = new Dialog();
         H4 header = new H4("Confirm Edit");
-        Label message = new Label("Are you sure you want to update the item?");
+        Label message = new Label("Are you sure you want to cancel the class?");
         Button cancel = new Button("Close");
         Button update = new Button("Cancel Class");
 
@@ -119,6 +119,8 @@ public class SlotInformationForm extends VerticalLayout {
             Connection con = DriverManager.getConnection(url,user,pwd);
             Statement stmt = con.createStatement();
             String facultyCode = getFacultyCode(faculty.getValue());
+            LocalDate date = LocalDate.now();
+            String today = date.toString();
             //Notification.show(batchNo+" "+slotNo+" "+courseCode.getValue()+" "+faculty.getValue()+" "+venue.getValue()+" "+dayNo);
             String sql = "select count(*) as cnt from weekTimetable where batchNo = "+batchNo+" and slotNo = "+slotNo+" and courseCode = '"+courseCode.getValue()+"' and facultyCode = '"+facultyCode+"' and hallNo = '"+venue.getValue()+"' and dayNo="+dayNo+";";
             ResultSet rs = stmt.executeQuery(sql);
@@ -128,7 +130,7 @@ public class SlotInformationForm extends VerticalLayout {
             rs.close();
             if(cnt>0){
                 // Then the cancellation is on a week slot
-                String sqlA  = "insert into updateTimetable (batchNo,slotNo,courseCode,facultyCode,hallNo,date,flag) values("+batchNo+","+slotNo+",'"+courseCode.getValue()+"','"+facultyCode+"','"+venue.getValue()+"','"+slotDate+"','CW')";
+                String sqlA  = "insert into updateTimetable (batchNo,slotNo,courseCode,facultyCode,hallNo,date,flag,postedDate) values("+batchNo+","+slotNo+",'"+courseCode.getValue()+"','"+facultyCode+"','"+venue.getValue()+"','"+slotDate+"','CW','"+today+"')";
                 int rst = stmt.executeUpdate(sqlA);
                 if(rst>0) {
                     Notification.show("Class cancelled",2000, Notification.Position.MIDDLE);
@@ -347,7 +349,7 @@ public class SlotInformationForm extends VerticalLayout {
             if(((Date.isAfter(today) || Date.isEqual(today)) && (Date.isBefore(MAX_BOUND))) && (validateScheduledClass(batchNo,fromSlotNo,toSlotNo,venue.getValue(),Date) == 1)){
                 int rst;
                 while(fromSlotNo<=toSlotNo){
-                    sql = "insert into updateTimetable (batchNo,slotNo,courseCode,facultyCode,hallNo,date,flag) values("+batchNo+","+fromSlotNo+",'"+courseCode.getValue()+"','"+facultyCode+"','"+venue.getValue()+"','"+Date+"','S');";
+                    sql = "insert into updateTimetable (batchNo,slotNo,courseCode,facultyCode,hallNo,date,flag,postedDate) values("+batchNo+","+fromSlotNo+",'"+courseCode.getValue()+"','"+facultyCode+"','"+venue.getValue()+"','"+Date+"','S','"+today.toString()+"');";
                     rst = stmt.executeUpdate(sql);
                     if(rst>0) {
                         Notification.show("Slot successfully scheduled", 2000, Notification.Position.MIDDLE);
@@ -377,13 +379,15 @@ public class SlotInformationForm extends VerticalLayout {
 
         no.addClickListener(evt->{
             dialog.close();
-           // UI.getCurrent().getPage().reload();
+            yes.getUI().ifPresent(ui -> {ui.navigate("");});
+            yes.getUI().ifPresent(ui -> {ui.navigate("view");});
         });
         yes.addClickListener(evt->{
            String flag = "S";
            new MailingDialog(flag,courseCode,date,fromSlot,toSlotNo,batchNo,venue);
            dialog.close();
-          // UI.getCurrent().getPage().reload();
+            yes.getUI().ifPresent(ui -> {ui.navigate("");});
+            yes.getUI().ifPresent(ui -> {ui.navigate("view");});
         });
     }
 

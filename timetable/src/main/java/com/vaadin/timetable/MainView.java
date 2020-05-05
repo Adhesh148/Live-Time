@@ -1,5 +1,6 @@
 package com.vaadin.timetable;
 
+import com.vaadin.componentfactory.ToggleButton;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.accordion.Accordion;
@@ -20,9 +21,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.PWA;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
+import com.vaadin.flow.theme.material.Material;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -41,13 +46,14 @@ import java.util.stream.Collectors;
 
 @Route("")
 @CssImport("./styles/shared-styles.css")
+//@Theme(value = Material.class,variant = Material.DARK)
+//@Theme(value = Lumo.class,variant = Lumo.DARK)
 public class MainView extends AppLayout {
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
     String pwd = "Password_123";
 
     public MainView(){
-
         //First get the user details and set Drawer accordingly
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String username = "";
@@ -69,11 +75,19 @@ public class MainView extends AppLayout {
             VerticalLayout db_children = new VerticalLayout();
             db_children.add(new RouterLink("Course", CourseView.class), new RouterLink("Faculty", FacultyView.class), new RouterLink("Batch", BatchView.class),new RouterLink("Mailing List",MailingGrid.class  ));
             accordion.add("Database", db_children);
+            Accordion userDetails = new Accordion();
+            VerticalLayout accordion_children = new VerticalLayout();
+            accordion_children.add(new RouterLink("Personal Information",EditPersonalInfo.class));
+            userDetails.add("Account",accordion_children);
             addToDrawer(new VerticalLayout(new RouterLink("Dashboard", DashboardView.class), new RouterLink("Live View", ViewTimeTable.class),
-                    new RouterLink("Project", ProjectView.class), accordion));
+                    new RouterLink("Project", ProjectView.class), accordion,userDetails));
         }else if(role.equals("USER")){
-            addToDrawer(new VerticalLayout(new RouterLink("Dashboard",DashboardView.class),new RouterLink("Live View",StudentTimetable.class),
-                    new RouterLink("Report",StudentReportView.class),new RouterLink("Edit Personal Info",EditPersonalInfo.class)));
+            Accordion userDetails = new Accordion();
+            VerticalLayout accordion_children = new VerticalLayout();
+            accordion_children.add(new RouterLink("Personal Information",EditPersonalInfo.class),new RouterLink("Feedback",StudentReportView.class));
+            userDetails.add("Account",accordion_children);
+            addToDrawer(new VerticalLayout(new RouterLink("Dashboard",StudentDashboard.class),new RouterLink("Live View",StudentTimetable.class),
+                   new RouterLink("Course Abbreviation",StudentAbbreviation.class),userDetails));
         }
     }
 
@@ -83,6 +97,19 @@ public class MainView extends AppLayout {
 
         Label username = new Label("Hello "+userName);
         username.addClassName("username");
+
+        ToggleButton themeToggle = new ToggleButton();
+        //themeToggle.setLabel("Change Mode");
+
+        themeToggle.addClickListener(toggleButtonClickEvent -> {
+            ThemeList themeList = UI.getCurrent().getElement().getThemeList();
+            if(themeList.contains(Lumo.DARK)){
+                themeList.remove(Lumo.DARK);
+            }else {
+                themeList.add(Lumo.DARK);
+            }
+        });
+
 
         MenuBar menuBar = new MenuBar();
         MenuItem user = menuBar.addItem(new Icon(VaadinIcon.USER));
@@ -94,10 +121,11 @@ public class MainView extends AppLayout {
         user.getSubMenu().addItem(new Anchor("/logout","Sign Out"));
         HorizontalLayout header =  new HorizontalLayout(new DrawerToggle(),logo);
         header.addClassName("header");
-        header.setWidth("95%");
+        header.setWidth("90%");
         header.setDefaultVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
 
-        addToNavbar(header,menuBar);
+        themeToggle.getStyle().set("padding-left","30px");
+        addToNavbar(header,menuBar,themeToggle);
     }
 
 
