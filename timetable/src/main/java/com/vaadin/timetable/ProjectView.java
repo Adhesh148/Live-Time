@@ -23,6 +23,10 @@ import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.component.upload.receivers.MultiFileMemoryBuffer;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.apache.commons.io.FilenameUtils;
+import org.hibernate.annotations.Check;
+
+import javax.faces.context.FacesContext;
 import java.io.File;
 
 import java.io.FileInputStream;
@@ -51,7 +55,9 @@ public class ProjectView extends VerticalLayout {
         create.addClickListener(buttonClickEvent -> {
             addNewProject();
         });
-        add(new HorizontalLayout(create));
+        Label heading  = new Label("Assignment Manager");
+        heading.addClassName("project-view-heading");
+        add(new HorizontalLayout(heading,create));
 
         updateProjectPanels();
     }
@@ -159,6 +165,25 @@ public class ProjectView extends VerticalLayout {
         Upload upload = new Upload(buffer);
         //--------------------------------------
 
+        //-------Set as required-----------
+        title.setRequired(true);
+        title.setRequiredIndicatorVisible(true);
+        desc.setRequired(true);
+        desc.setRequiredIndicatorVisible(true);
+        facultyCode.setRequired(true);
+        facultyCode.setRequiredIndicatorVisible(true);
+        courseCode.setRequired(true);
+        courseCode.setRequiredIndicatorVisible(true);
+        batch.setRequired(true);
+        batch.setRequiredIndicatorVisible(true);
+        deadlineDate.setRequired(true);
+        deadlineTime.setRequired(true);
+        marks.setRequired(true);
+        marks.setRequiredIndicatorVisible(true);
+        topic.setRequired(true);
+        topic.setRequiredIndicatorVisible(true);
+
+
         VerticalLayout innerSecondaryLayout = new VerticalLayout();
         innerSecondaryLayout.add(title,desc,upload,assign);
         inner_layout.addToPrimary(innerSecondaryLayout);
@@ -261,9 +286,18 @@ public class ProjectView extends VerticalLayout {
         deadlineDate.setMin(today);
         deadlineDate.setMax(today.plusMonths(6));
         //Add Functionality to AssignButton
+        // Check if all essential fields are filled.
+        int flag =1;
+
+        int finalFlag = flag;
         assign.addClickListener(buttonClickEvent -> {
-            insertNewProject(title,desc,facultyCode,courseCode,batch,marks,deadlineDate,deadlineTime,topic,teamSize,upload,buffer);
-            project.close();
+            if(title.getValue().equalsIgnoreCase("") || desc.getValue().equalsIgnoreCase("") || facultyCode.isEmpty() == true || courseCode.isEmpty() == true ||
+                    batch.isEmpty() == true || marks.getValue().equalsIgnoreCase("") || deadlineDate.isEmpty() == true || deadlineDate.isEmpty()==true || topic.getValue().equalsIgnoreCase("")){
+               Notification.show("Empty Fields",2000, Notification.Position.MIDDLE);
+            }else{
+                insertNewProject(title, desc, facultyCode, courseCode, batch, marks, deadlineDate, deadlineTime, topic, teamSize, upload, buffer);
+                project.close();
+            }
         });
 
 
@@ -290,10 +324,19 @@ public class ProjectView extends VerticalLayout {
             Calendar cal = Calendar.getInstance();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String postDate = sdf.format(cal.getTime());
-            String sql = "insert into projectAssign (postedDate,courseCode,facultyCode,title,description,batchNo,marks,dueDate,dueTime,topic,teamSize) \n" +
-                    " values('"+postDate+"','"+courseCode.getValue()+"','"+facultyCode.getValue()+"','"+title.getValue()+"','"+desc.getValue()+"',\n" +
-                    ""+batchNo+","+marks.getValue()+",'"+deadlineDate.getValue()+"',\n" +
-                    "'"+deadlineTime.getValue()+"','"+topic.getValue()+"',"+teamSize.getValue()+");";
+            String sql;
+            if(!teamSize.getValue().equalsIgnoreCase("")){
+               sql  = "insert into projectAssign (postedDate,courseCode,facultyCode,title,description,batchNo,marks,dueDate,dueTime,topic,teamSize) \n" +
+                        " values('"+postDate+"','"+courseCode.getValue()+"','"+facultyCode.getValue()+"','"+title.getValue()+"','"+desc.getValue()+"',\n" +
+                        ""+batchNo+","+marks.getValue()+",'"+deadlineDate.getValue()+"',\n" +
+                        "'"+deadlineTime.getValue()+"','"+topic.getValue()+"',"+teamSize.getValue()+");";
+            }else{
+                sql  = "insert into projectAssign (postedDate,courseCode,facultyCode,title,description,batchNo,marks,dueDate,dueTime,topic) \n" +
+                        " values('"+postDate+"','"+courseCode.getValue()+"','"+facultyCode.getValue()+"','"+title.getValue()+"','"+desc.getValue()+"',\n" +
+                        ""+batchNo+","+marks.getValue()+",'"+deadlineDate.getValue()+"',\n" +
+                        "'"+deadlineTime.getValue()+"','"+topic.getValue()+"');";
+            }
+
             int rs;
             rs = stmt.executeUpdate(sql);
             if(rs>0) {
@@ -301,6 +344,8 @@ public class ProjectView extends VerticalLayout {
                 // Now we have to insert attachment to attachment table
                 //First Let us insert data without attachment into attachment table
                 if(buffer.getInputStream().read()!=-1) {
+                    String fileName = buffer.getFileName();
+                    String fileType = FilenameUtils.getExtension(fileName);
                     String sqlA = "select Sno from projectAssign where postedDate ='" + postDate + "'and courseCode = '" + courseCode.getValue() + "' and title = '" + title.getValue() + "' and facultyCode='" + facultyCode.getValue() + "' and batchNo = " + batchNo + ";";
                     Statement stmtA = con.createStatement();
                     ResultSet rstA = stmtA.executeQuery(sqlA);
@@ -308,10 +353,11 @@ public class ProjectView extends VerticalLayout {
                     int Pno = rstA.getInt("Sno");
                     rstA.close();
                     PreparedStatement pStmt = null;
-                    String sqlB = "insert into attachment (Pno,attach) values(?,?);";
+                    String sqlB = "insert into attachment (Pno,attach,format) values(?,?,?);";
                     pStmt = con.prepareStatement(sqlB);
                     pStmt.setInt(1, Pno);
                     pStmt.setBinaryStream(2, buffer.getInputStream());
+                    pStmt.setString(3,fileType);
                     pStmt.executeUpdate();
                     Notification.show("Attachment Successfully inserted.", 2000, Notification.Position.MIDDLE);
                     // reload, can think of another way.
@@ -320,6 +366,7 @@ public class ProjectView extends VerticalLayout {
             }
             else
                 Notification.show("Insertion unsuccessful.",2000, Notification.Position.MIDDLE);
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }

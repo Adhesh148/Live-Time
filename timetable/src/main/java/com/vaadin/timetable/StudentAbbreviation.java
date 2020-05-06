@@ -2,6 +2,8 @@ package com.vaadin.timetable;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -29,6 +31,8 @@ public class StudentAbbreviation extends VerticalLayout {
     String user = "dbms";
     String pwd = "Password_123";
 
+    Label heading = new Label("Course Abbreviation");
+    Label message = new Label("Personalize your live timetable by setting your own course abbreviations.");
     Grid<AbbreviationEntry>grid = new Grid<>(AbbreviationEntry.class);
     TextField filterText = new TextField();
 
@@ -50,6 +54,9 @@ public class StudentAbbreviation extends VerticalLayout {
 
         form.setVisible(false);
 
+        heading.addClassName("course-abbreviation-heading");
+        message.addClassName("course-abbreviation-message");
+        add(heading,message,new Hr());
         add(filterText,content);
     }
 
@@ -136,7 +143,7 @@ public class StudentAbbreviation extends VerticalLayout {
     }
 
     private void configureGrid(Grid<AbbreviationEntry> grid) {
-        grid.setSizeFull();
+        //grid.setSizeFull();
         grid.setSortableColumns();
         grid.getColumnByKey("sno").setWidth("30px");
         grid.getColumnByKey("courseCode").setWidth("40px");

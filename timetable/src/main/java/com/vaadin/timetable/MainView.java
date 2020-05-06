@@ -87,7 +87,7 @@ public class MainView extends AppLayout {
             accordion_children.add(new RouterLink("Personal Information",EditPersonalInfo.class),new RouterLink("Feedback",StudentReportView.class));
             userDetails.add("Account",accordion_children);
             addToDrawer(new VerticalLayout(new RouterLink("Dashboard",StudentDashboard.class),new RouterLink("Live View",StudentTimetable.class),
-                   new RouterLink("Course Abbreviation",StudentAbbreviation.class),userDetails));
+                   new RouterLink("Course Abbreviation",StudentAbbreviation.class),new RouterLink("Project",StudentProjectView.class),userDetails));
         }
     }
 

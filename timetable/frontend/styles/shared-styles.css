@@ -50,6 +50,9 @@
     display:flex;
 }
 
+.timetable-grid{
+    margin-bottom:-14px;
+}
 .timetable-grid .v-grid-body .v-grid-cell {
     line-height: 18px;     // adjust to your needs
     font-size: 10px;       // adjust to your needs
@@ -57,11 +60,8 @@
 }
 
 .project-create{
-    background-color:darkgreen;
-     border: none;
-     color: white;
      border-radius: 25px;
-     //margin-left: 400px;
+     margin-top: 20px;
 }
 
 .project-delete{
@@ -192,4 +192,17 @@ font-weight:bold;
     font-size:16px;
 }
 
+.project-view-heading{
+   font-size:42px;
+   font-weight:900;
+}
 
+.course-abbreviation-heading{
+   font-size:37px;
+   font-weight:900;
+   margin-bottom:-20px;
+}
+
+.course-abbreviation-message{
+     font-size:17px;
+}

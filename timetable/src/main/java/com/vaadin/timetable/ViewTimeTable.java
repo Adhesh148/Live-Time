@@ -10,6 +10,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -21,14 +22,17 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import com.vaadin.timetable.backend.TableEntry;
+import org.apache.commons.lang3.StringUtils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -48,6 +52,9 @@ public class ViewTimeTable extends VerticalLayout {
 
     DatePicker datePicker = new DatePicker();
 
+    Label heading = new Label("Live View");
+    Label message = new Label("View your weekly timetable as it changes.");
+
     public ViewTimeTable() {
 
         configureComboBox(comboBox);
@@ -59,8 +66,34 @@ public class ViewTimeTable extends VerticalLayout {
 
         // May have to get from comboBox instead of hardcoding
         comboBox.setValue("COE 2018");
+        String weekSelected = "Week ";
+        Label weekDisplay = new Label();
         datePicker.addValueChangeListener(datePickerLocalDateComponentValueChangeEvent -> {
             fillGrid(grid, (String) comboBox.getValue());
+            LocalDate today = datePicker.getValue();
+            int dayOfWeek = today.getDayOfWeek().getValue();
+            LocalDate Sun = today.plusDays(-1*dayOfWeek);
+            LocalDate Sat = Sun.plusDays(6);
+            String input = datePicker.getValue().toString();
+            Calendar cal = Calendar.getInstance();
+            String format = "yyyy-MM-dd";
+            SimpleDateFormat df = new SimpleDateFormat(format);
+            Date date = null;
+            try {
+                date = df.parse(input);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            cal.setTime(date);
+            int week = cal.get(Calendar.WEEK_OF_YEAR);
+            int year = cal.get(Calendar.YEAR);
+            String monthNameSun = Month.of(Integer.parseInt(Sun.toString().split("-")[1])).name();
+            monthNameSun = monthNameSun.toLowerCase();
+            monthNameSun = StringUtils.capitalize(monthNameSun);
+            String monthNameSat = Month.of(Integer.parseInt(Sat.toString().split("-")[1])).name();
+            monthNameSat = monthNameSat.toLowerCase();
+            monthNameSat = StringUtils.capitalize(monthNameSat);
+            weekDisplay.setText("Week "+week+", "+year+" - "+Sun.toString().split("-")[2]+" "+monthNameSun+" to "+Sat.toString().split("-")[2]+" "+monthNameSat);
         });
         datePicker.setValue(LocalDate.now());
         configureDatePicker();
@@ -90,7 +123,11 @@ public class ViewTimeTable extends VerticalLayout {
             deleteSlot();
 
         });
-        add(toolbar, grid, form);
+
+        heading.addClassName("course-abbreviation-heading");
+        message.addClassName("course-abbreviation-message");
+        add(heading,message,new Hr());
+        add(toolbar,weekDisplay, grid, form);
 
     }
 

@@ -81,11 +81,12 @@ public class ProjectPanel extends VerticalLayout {
         Button download = new Button("Download");
 
         ByteArrayInputStream inputStream = setAttachment(postedDate,courseCode,facultyCode,title,batch,marks,dueDate,dueTime);
-//        if(downloadFormat.equalsIgnoreCase("")){
-//            downloadFormat = "txt";
-//        }
+        String fileName = "download";
+        if(!downloadFormat.equalsIgnoreCase("")){
+            fileName = fileName +"."+downloadFormat;
+        }
         FileDownloadWrapper buttonWrapper = new FileDownloadWrapper(
-                new StreamResource("download", () -> inputStream));
+                new StreamResource(fileName, () -> inputStream));
         buttonWrapper.wrapComponent(download);
 
 

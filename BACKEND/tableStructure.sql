@@ -249,5 +249,7 @@ alter table projectAssign add column teamSize int(11);
 
 select * from projectAssign;
 
-select * from attachment; 
+select * from attachment;	
+
+alter table attachment modify column attach longblob; 
 
