@@ -7,6 +7,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Hr;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -45,6 +46,9 @@ public class MailingGrid extends VerticalLayout {
     TextField filterText = new TextField();
     MailingListForm form = new MailingListForm();
 
+    Label heading = new Label("Mailing List");
+    Label message = new Label("Add,Edit and Delete records of Mailing List.");
+
     public MailingGrid(){
         setClassName("course-list");
         setSizeFull();
@@ -69,6 +73,9 @@ public class MailingGrid extends VerticalLayout {
             addFromImport();
         });
 
+        heading.addClassName("course-abbreviation-heading");
+        message.addClassName("course-abbreviation-message");
+        add(heading,message,new Hr());
         add(toolBar,content);
 
     }

@@ -206,3 +206,21 @@ font-weight:bold;
 .course-abbreviation-message{
      font-size:17px;
 }
+
+.router-link {
+       flex-grow:      1;
+         flex-shrink:    1;
+      padding: 10px 20px;
+      cursor:pointer;
+      text-decoration: none;
+      transition:0.3s;
+      font: bold 14px Arial;
+      font-color:
+
+}
+
+.router-link:hover {
+   background-color:#beecea;
+   text-decoration:none
+}
+

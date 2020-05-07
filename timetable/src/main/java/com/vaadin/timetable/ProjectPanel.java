@@ -81,22 +81,25 @@ public class ProjectPanel extends VerticalLayout {
         Button download = new Button("Download");
 
         ByteArrayInputStream inputStream = setAttachment(postedDate,courseCode,facultyCode,title,batch,marks,dueDate,dueTime);
-        String fileName = "download";
-        if(!downloadFormat.equalsIgnoreCase("")){
+        String fileName = getFileName(projectNo);
+        if(fileName == null)
+            fileName = "download";
+
+        if(!(downloadFormat.equalsIgnoreCase(""))){
             fileName = fileName +"."+downloadFormat;
         }
         FileDownloadWrapper buttonWrapper = new FileDownloadWrapper(
                 new StreamResource(fileName, () -> inputStream));
         buttonWrapper.wrapComponent(download);
 
-
         //Add a delete button
         Button delete  = new Button("Delete",VaadinIcon.MINUS.create());
         Button edit  = new Button("Edit",VaadinIcon.EDIT.create());
 
         HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.add(delete,edit,buttonWrapper);
-
+        //have removed edit button from layout will have to do it later.
+        buttonLayout.add(delete,buttonWrapper);
+        int containDownload = hasDownload(postedDate, courseCode, facultyCode, title, batch, marks, dueDate, dueTime);
         if(hasDownload(postedDate, courseCode, facultyCode, title, batch, marks, dueDate, dueTime) == 0){
             buttonWrapper.setVisible(false);
         }
@@ -111,8 +114,29 @@ public class ProjectPanel extends VerticalLayout {
         });
 
         edit.addClickListener(evt -> {
-            onEdit(postedDate,courseCode,facultyCode,title,desc,batch,marks,dueDate,dueTime,teamSize,topic);
+            onEdit(postedDate,courseCode,facultyCode,title,desc,batch,marks,dueDate,dueTime,teamSize,topic,projectNo,inputStream,containDownload);
         });
+    }
+
+    private String getFileName(int projectNo) {
+        String fName = "";
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(url,user,pwd);
+            Statement stmt = con.createStatement();
+            ResultSet rs;
+            String sqlA = "select fileName from attachment  where Pno = "+projectNo+";";
+            rs = stmt.executeQuery(sqlA);
+            if(rs.next()){
+                fName = rs.getString("fileName");
+            }
+            rs.close();
+            con.close();
+        }catch (Exception e){
+            Notification.show(e.getLocalizedMessage());
+        }
+
+        return fName;
     }
 
     private int hasDownload(String postedDate, String courseCode, String facultyCode, String title, String batch, int marks, String dueDate, String dueTime) {
@@ -145,6 +169,7 @@ public class ProjectPanel extends VerticalLayout {
 
     private ByteArrayInputStream setAttachment(String postedDate, String courseCode, String facultyCode, String title, String batch, int marks, String dueDate, String dueTime) {
        ByteArrayInputStream is = null;
+       String fName = "";
         try{
             // Have to work on this.
             String fileName = "download";
@@ -169,6 +194,7 @@ public class ProjectPanel extends VerticalLayout {
                 downloadFormat = format;
                 //OutputStream os = new FileOutputStream("/home/adheshreghu/Documents/SEM4/MYSQL/"+fileName+"."+format);
             }
+            con.close();
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());
         }
@@ -207,7 +233,7 @@ public class ProjectPanel extends VerticalLayout {
         });
     }
 
-    private void onEdit(String InppostedDate, String InpcourseCode, String InpfacultyCode, String Inptitle, String InpDesc, String InpBatch, int Inpmarks, String InpdueDate, String InpdueTime,int InpTeamSize,String InpTopic) {
+    private void onEdit(String InppostedDate, String InpcourseCode, String InpfacultyCode, String Inptitle, String InpDesc, String InpBatch, int Inpmarks, String InpdueDate, String InpdueTime, int InpTeamSize, String InpTopic, int projectNo, ByteArrayInputStream inputStream, int containDownload) {
         Dialog project = new Dialog();
 
         SplitLayout outer_layout = new SplitLayout();
@@ -305,6 +331,7 @@ public class ProjectPanel extends VerticalLayout {
                 rs = stmt.executeQuery(sql);
                 rs.next();
                 facultyName.setValue(rs.getString("facultyName"));
+                con.close();
             }catch (Exception e){
                 Notification.show(e.getLocalizedMessage());
             }
@@ -320,6 +347,7 @@ public class ProjectPanel extends VerticalLayout {
                 rs = stmt.executeQuery(sql);
                 rs.next();
                 facultyCode.setValue(rs.getString("facultyCode"));
+                con.close();
             }catch (Exception e){
                 Notification.show(e.getLocalizedMessage());
             }
@@ -335,6 +363,7 @@ public class ProjectPanel extends VerticalLayout {
                 rs = stmt.executeQuery(sql);
                 rs.next();
                 courseName.setValue(rs.getString("courseName"));
+                con.close();
             }catch (Exception e){
                 Notification.show(e.getLocalizedMessage());
             }
@@ -350,6 +379,7 @@ public class ProjectPanel extends VerticalLayout {
                 rs = stmt.executeQuery(sql);
                 rs.next();
                 courseCode.setValue(rs.getString("courseCode"));
+                con.close();
             }catch (Exception e){
                 Notification.show(e.getLocalizedMessage());
             }
@@ -370,6 +400,8 @@ public class ProjectPanel extends VerticalLayout {
         teamSize.setValue(String.valueOf(InpTeamSize));
         topic.setValue(InpTopic);
         batch.setValue(getBatchInfo(InpBatch));
+
+
         //add functionality to save button
         save.addClickListener(evt->{
 

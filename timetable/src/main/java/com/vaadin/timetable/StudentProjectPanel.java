@@ -60,8 +60,11 @@ public class StudentProjectPanel extends VerticalLayout {
         Button download = new Button("Download");
 
         ByteArrayInputStream inputStream = setAttachment(postedDate,courseCode,facultyCode,title,batch,marks,dueDate,dueTime);
-        String fileName = "download";
-        if(!downloadFormat.equalsIgnoreCase("")){
+        String fileName = getFileName(projectNo);
+        if(fileName == null)
+            fileName = "download";
+
+        if(!(downloadFormat.equalsIgnoreCase(""))){
             fileName = fileName +"."+downloadFormat;
         }
         FileDownloadWrapper buttonWrapper = new FileDownloadWrapper(
@@ -79,6 +82,27 @@ public class StudentProjectPanel extends VerticalLayout {
 
         add(titleLabel,subheading,new Hr(),description,new Hr(),buttonLayout);
 
+    }
+
+    private String getFileName(int projectNo) {
+        String fName = "";
+        try{
+            Class.forName("com.mysql.jdbc.Driver");
+            Connection con = DriverManager.getConnection(url,user,pwd);
+            Statement stmt = con.createStatement();
+            ResultSet rs;
+            String sqlA = "select fileName from attachment  where Pno = "+projectNo+";";
+            rs = stmt.executeQuery(sqlA);
+            if(rs.next()){
+                fName = rs.getString("fileName");
+            }
+            rs.close();
+            con.close();
+        }catch (Exception e){
+            Notification.show(e.getLocalizedMessage());
+        }
+
+        return fName;
     }
 
     private int hasDownload(String postedDate, String courseCode, String facultyCode, String title, String batch, int marks, String dueDate, String dueTime) {

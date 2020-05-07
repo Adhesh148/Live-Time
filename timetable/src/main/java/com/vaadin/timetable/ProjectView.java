@@ -163,6 +163,7 @@ public class ProjectView extends VerticalLayout {
         // Simple in memory single file upload.
         MemoryBuffer buffer = new MemoryBuffer();
         Upload upload = new Upload(buffer);
+        //upload.setMaxFileSize();
         //--------------------------------------
 
         //-------Set as required-----------
@@ -353,11 +354,14 @@ public class ProjectView extends VerticalLayout {
                     int Pno = rstA.getInt("Sno");
                     rstA.close();
                     PreparedStatement pStmt = null;
-                    String sqlB = "insert into attachment (Pno,attach,format) values(?,?,?);";
+                    String sqlB = "insert into attachment (Pno,attach,format,fileName) values(?,?,?,?);";
                     pStmt = con.prepareStatement(sqlB);
                     pStmt.setInt(1, Pno);
                     pStmt.setBinaryStream(2, buffer.getInputStream());
                     pStmt.setString(3,fileType);
+                    String fname = buffer.getFileName();
+                    String name = fname.substring(0, fname.lastIndexOf('.'));
+                    pStmt.setString(4,name);
                     pStmt.executeUpdate();
                     Notification.show("Attachment Successfully inserted.", 2000, Notification.Position.MIDDLE);
                     // reload, can think of another way.

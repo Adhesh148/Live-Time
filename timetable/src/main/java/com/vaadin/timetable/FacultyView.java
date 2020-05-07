@@ -4,6 +4,8 @@ package com.vaadin.timetable;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -33,6 +35,9 @@ public class FacultyView extends VerticalLayout {
     TextField filterText = new TextField();
     FacultyInformationForm form = new FacultyInformationForm();
 
+    Label heading = new Label("Faculty Records");
+    Label message = new Label("Add,Edit and Delete records of Faculty.");
+
     Icon addNew = new Icon(VaadinIcon.PLUS_CIRCLE);
 
     public FacultyView(){
@@ -56,6 +61,9 @@ public class FacultyView extends VerticalLayout {
             addFaculty();
         });
 
+        heading.addClassName("course-abbreviation-heading");
+        message.addClassName("course-abbreviation-message");
+        add(heading,message,new Hr());
         add(toolBar,content);
 
     }
@@ -95,7 +103,6 @@ public class FacultyView extends VerticalLayout {
                 data.add(entry);
             }
             grid.setItems(data);
-
 
         }catch (Exception e){
             Notification.show(e.getLocalizedMessage());

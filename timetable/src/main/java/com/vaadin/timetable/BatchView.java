@@ -2,6 +2,8 @@ package com.vaadin.timetable;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Hr;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
@@ -35,6 +37,9 @@ public class BatchView extends VerticalLayout {
 
     Icon addNew = new Icon(VaadinIcon.PLUS_CIRCLE);
 
+    Label heading = new Label("Batch Records");
+    Label message = new Label("Add,Edit and Delete records of Batches.");
+
     public BatchView(){
         setClassName("batch-list");
         setSizeFull();
@@ -56,6 +61,9 @@ public class BatchView extends VerticalLayout {
             addBatch();
         });
 
+        heading.addClassName("course-abbreviation-heading");
+        message.addClassName("course-abbreviation-message");
+        add(heading,message,new Hr());
         add(toolBar,content);
 
     }

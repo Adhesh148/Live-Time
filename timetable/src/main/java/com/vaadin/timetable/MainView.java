@@ -46,7 +46,6 @@ import java.util.stream.Collectors;
 
 @Route("")
 @CssImport("./styles/shared-styles.css")
-//@Theme(value = Material.class,variant = Material.DARK)
 //@Theme(value = Lumo.class,variant = Lumo.DARK)
 public class MainView extends AppLayout {
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
@@ -70,24 +69,62 @@ public class MainView extends AppLayout {
 
 
     private void createDrawer(String role) {
+        //--admin links --
+        RouterLink course = new RouterLink("Course",CourseView.class);
+        RouterLink faculty = new RouterLink("Faculty",FacultyView.class);
+        RouterLink batch = new RouterLink("Batch",BatchView.class);
+        RouterLink mailingList = new RouterLink("Mailing List",MailingGrid.class);
+        RouterLink students = new RouterLink("Students",AdminStudentRecord.class);
+        RouterLink personalInfo = new RouterLink("Personal Information",EditPersonalInfo.class);
+        RouterLink dashboard = new RouterLink("Dashboard",DashboardView.class);
+        RouterLink adminLiveView = new RouterLink("Live View",ViewTimeTable.class);
+        RouterLink adminProject = new RouterLink("Project",ProjectView.class);
+
+        // --- add class Names -------
+        course.addClassName("router-link");
+        faculty.addClassName("router-link");
+        batch.addClassName("router-link");
+        mailingList.addClassName("router-link");
+        students.addClassName("router-link");
+        personalInfo.addClassName("router-link");
+        dashboard.addClassName("router-link");
+        adminLiveView.addClassName("router-link");
+        adminProject.addClassName("router-link");
+
+        //--user links ---
+        RouterLink feedback = new RouterLink("Feedback",StudentReportView.class);
+        RouterLink studentDashboard = new RouterLink("Dashboard",StudentDashboard.class);
+        RouterLink studentLiveView = new RouterLink("Live View",StudentTimetable.class);
+        RouterLink courseAbbrv = new RouterLink("Course Abbreviation",StudentAbbreviation.class);
+        RouterLink studentProject = new RouterLink("Project",StudentProjectView.class);
+
+        // --- add class Names -------
+        feedback.addClassName("router-link");
+        studentDashboard.addClassName("router-link");
+        studentLiveView.addClassName("router-link");
+        courseAbbrv.addClassName("router-link");
+        studentProject.addClassName("router-link");
+
+
         if(role.equals("ADMIN")) {
             Accordion accordion = new Accordion();
             VerticalLayout db_children = new VerticalLayout();
-            db_children.add(new RouterLink("Course", CourseView.class), new RouterLink("Faculty", FacultyView.class), new RouterLink("Batch", BatchView.class),new RouterLink("Mailing List",MailingGrid.class  ));
+            db_children.add(course, faculty,batch,
+                    mailingList,students);
             accordion.add("Database", db_children);
             Accordion userDetails = new Accordion();
             VerticalLayout accordion_children = new VerticalLayout();
-            accordion_children.add(new RouterLink("Personal Information",EditPersonalInfo.class));
+            accordion_children.add(personalInfo);
             userDetails.add("Account",accordion_children);
-            addToDrawer(new VerticalLayout(new RouterLink("Dashboard", DashboardView.class), new RouterLink("Live View", ViewTimeTable.class),
-                    new RouterLink("Project", ProjectView.class), accordion,userDetails));
+            addToDrawer(new VerticalLayout(dashboard, adminLiveView,
+                    adminProject, accordion,userDetails));
         }else if(role.equals("USER")){
             Accordion userDetails = new Accordion();
             VerticalLayout accordion_children = new VerticalLayout();
-            accordion_children.add(new RouterLink("Personal Information",EditPersonalInfo.class),new RouterLink("Feedback",StudentReportView.class));
+            accordion_children.add(personalInfo,feedback);
             userDetails.add("Account",accordion_children);
-            addToDrawer(new VerticalLayout(new RouterLink("Dashboard",StudentDashboard.class),new RouterLink("Live View",StudentTimetable.class),
-                   new RouterLink("Course Abbreviation",StudentAbbreviation.class),new RouterLink("Project",StudentProjectView.class),userDetails));
+            addToDrawer(new VerticalLayout(studentDashboard,studentLiveView,
+                  courseAbbrv,studentProject,userDetails));
         }
     }
 
@@ -117,7 +154,7 @@ public class MainView extends AppLayout {
         name.addClassName("setVisible");
         user.getSubMenu().addItem(name).setEnabled(false);
         user.getSubMenu().add(new Hr());
-        user.getSubMenu().addItem("Edit Personal Info");
+        user.getSubMenu().addItem("Edit Personal Info",e-> UI.getCurrent().navigate("personal_info"));
         user.getSubMenu().addItem(new Anchor("/logout","Sign Out"));
         HorizontalLayout header =  new HorizontalLayout(new DrawerToggle(),logo);
         header.addClassName("header");
