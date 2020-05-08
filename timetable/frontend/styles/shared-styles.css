@@ -224,3 +224,32 @@ font-weight:bold;
    text-decoration:none
 }
 
+.admin-report-panel{
+   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+   transition: 0.3s;
+   display: flex;
+   margin-top:7px;
+}
+
+.admin-report-panel:hover {
+  box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+.admin-report-final-layout{
+    display:flex;
+}
+
+.admin-report-panel-flag{
+    width:25%;
+    height: inherit;
+}
+
+.admin-report-panel-user{
+    width:25%;
+    height: inherit;
+}
+
+.admin-report-panel-report{
+    width:50%;
+    height: inherit;
+}
+

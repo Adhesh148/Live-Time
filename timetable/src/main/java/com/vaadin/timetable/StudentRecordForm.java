@@ -16,9 +16,8 @@ import com.vaadin.timetable.backend.StudentRecordEntry;
 
 import java.sql.*;
 
-import static com.vaadin.flow.component.Key.FN;
-
 public class StudentRecordForm extends VerticalLayout {
+
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
     String pwd = "Password_123";

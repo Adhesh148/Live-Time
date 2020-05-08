@@ -61,12 +61,21 @@ public class ProjectPanel extends VerticalLayout {
         Icon clipboard = new Icon(VaadinIcon.CLIPBOARD);
         Icon circleIcon = new Icon(VaadinIcon.CIRCLE);
         Icon circleIcon_dupl = new Icon(VaadinIcon.CIRCLE);
+        Icon circleIcon_1 = new Icon(VaadinIcon.CIRCLE);
+        Icon circleIcon_2 = new Icon(VaadinIcon.CIRCLE);
         clipboard.getStyle().set("width","var(--iron-icon-width, 20px)");
         circleIcon.getStyle().set("width","var(--iron-icon-width, 8px)");
         circleIcon_dupl.getStyle().set("width","var(--iron-icon-width, 8px)");
+        circleIcon_1.getStyle().set("width","var(--iron-icon-width, 8px)");
+        circleIcon_2.getStyle().set("width","var(--iron-icon-width, 8px)");
+
+
         Label message = new Label("Assignment Due "+monthName+" "+DueDate[2]+", "+DueDate[0]+" ");
         Label point = new Label("Points: "+marks);
         Label teams = new Label("Team Size: "+teamSize);
+        Label facultyLabel = new Label(facultyCode);
+        Label courseLabel = new Label(courseCode);
+        Label batchLabel = new Label(getBatchInfo(batch));
         HorizontalLayout subheading;
         if(teamSize == 0)
             subheading = new HorizontalLayout(clipboard,message,circleIcon,point);
@@ -97,8 +106,15 @@ public class ProjectPanel extends VerticalLayout {
         Button edit  = new Button("Edit",VaadinIcon.EDIT.create());
 
         HorizontalLayout buttonLayout = new HorizontalLayout();
-        //have removed edit button from layout will have to do it later.
-        buttonLayout.add(delete,buttonWrapper);
+        HorizontalLayout courseLayout = new HorizontalLayout(facultyLabel,circleIcon_1,courseLabel,circleIcon_2,batchLabel);
+        buttonLayout.add(buttonWrapper,delete,courseLayout);
+        buttonLayout.setWidthFull();
+        buttonLayout.getStyle().set("display","flex");
+        buttonLayout.setJustifyContentMode(JustifyContentMode.CENTER);
+        buttonLayout.setAlignSelf(Alignment.CENTER,buttonWrapper);
+        buttonLayout.setAlignSelf(Alignment.CENTER,courseLayout);
+        courseLayout.getStyle().set("margin-left","auto");
+
         int containDownload = hasDownload(postedDate, courseCode, facultyCode, title, batch, marks, dueDate, dueTime);
         if(hasDownload(postedDate, courseCode, facultyCode, title, batch, marks, dueDate, dueTime) == 0){
             buttonWrapper.setVisible(false);

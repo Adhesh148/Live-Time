@@ -79,6 +79,7 @@ public class MainView extends AppLayout {
         RouterLink dashboard = new RouterLink("Dashboard",DashboardView.class);
         RouterLink adminLiveView = new RouterLink("Live View",ViewTimeTable.class);
         RouterLink adminProject = new RouterLink("Project",ProjectView.class);
+        RouterLink adminReport = new RouterLink("View Report",AdminReportView.class);
 
         // --- add class Names -------
         course.addClassName("router-link");
@@ -90,6 +91,7 @@ public class MainView extends AppLayout {
         dashboard.addClassName("router-link");
         adminLiveView.addClassName("router-link");
         adminProject.addClassName("router-link");
+        adminReport.addClassName("router-link");
 
         //--user links ---
         RouterLink feedback = new RouterLink("Feedback",StudentReportView.class);
@@ -117,7 +119,7 @@ public class MainView extends AppLayout {
             accordion_children.add(personalInfo);
             userDetails.add("Account",accordion_children);
             addToDrawer(new VerticalLayout(dashboard, adminLiveView,
-                    adminProject, accordion,userDetails));
+                    adminProject, accordion,userDetails,adminReport));
         }else if(role.equals("USER")){
             Accordion userDetails = new Accordion();
             VerticalLayout accordion_children = new VerticalLayout();

@@ -43,6 +43,7 @@ public class ViewTimeTable extends VerticalLayout {
     String url = "jdbc:mysql://localhost:3306/liveTimetable ";
     String user = "dbms";
     String pwd = "Password_123";
+
     Grid<TableEntry> grid;
     SlotInformationForm form = new SlotInformationForm();
     ComboBox comboBox = new ComboBox();

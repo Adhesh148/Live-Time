@@ -42,12 +42,19 @@ public class StudentProjectPanel extends VerticalLayout {
         Icon clipboard = new Icon(VaadinIcon.CLIPBOARD);
         Icon circleIcon = new Icon(VaadinIcon.CIRCLE);
         Icon circleIcon_dupl = new Icon(VaadinIcon.CIRCLE);
+        Icon circleIcon_1 = new Icon(VaadinIcon.CIRCLE);
+        Icon circleIcon_2 = new Icon(VaadinIcon.CIRCLE);
+
         clipboard.getStyle().set("width","var(--iron-icon-width, 20px)");
         circleIcon.getStyle().set("width","var(--iron-icon-width, 8px)");
         circleIcon_dupl.getStyle().set("width","var(--iron-icon-width, 8px)");
+        circleIcon_1.getStyle().set("width","var(--iron-icon-width, 8px)");
+        circleIcon_2.getStyle().set("width","var(--iron-icon-width, 8px)");
         Label message = new Label("Assignment Due "+monthName+" "+DueDate[2]+", "+DueDate[0]+" ");
         Label point = new Label("Points: "+marks);
         Label teams = new Label("Team Size: "+teamSize);
+        Label facultyLabel = new Label(facultyCode);
+        Label courseLabel = new Label(courseCode);
         HorizontalLayout subheading;
         if(teamSize == 0)
             subheading = new HorizontalLayout(clipboard,message,circleIcon,point);
@@ -74,7 +81,14 @@ public class StudentProjectPanel extends VerticalLayout {
 
         //Add a delete button
         HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.add(buttonWrapper);
+        HorizontalLayout courseLayout = new HorizontalLayout(facultyLabel,circleIcon_1,courseLabel);
+        buttonLayout.add(buttonWrapper,courseLayout);
+        buttonLayout.setWidthFull();
+        buttonLayout.getStyle().set("display","flex");
+        buttonLayout.setJustifyContentMode(JustifyContentMode.CENTER);
+        buttonLayout.setAlignSelf(Alignment.CENTER,buttonWrapper);
+        buttonLayout.setAlignSelf(Alignment.CENTER,courseLayout);
+        courseLayout.getStyle().set("margin-left","auto");
 
         if(hasDownload(postedDate, courseCode, facultyCode, title, batch, marks, dueDate, dueTime) == 0){
             buttonWrapper.setVisible(false);
