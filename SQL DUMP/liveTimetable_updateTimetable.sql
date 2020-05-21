@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.29, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.30, for Linux (x86_64)
 --
--- Host: 127.0.0.1    Database: liveTimetable
+-- Host: aauorfmbt136d0.cuz1bxluuufz.ap-south-1.rds.amazonaws.com    Database: liveTimetable
 -- ------------------------------------------------------
--- Server version	5.7.29-0ubuntu0.18.04.1
+-- Server version	8.0.16
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
+
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED='';
 
 --
 -- Table structure for table `updateTimetable`
@@ -32,6 +40,7 @@ CREATE TABLE `updateTimetable` (
   `date` date NOT NULL,
   `flag` varchar(2) NOT NULL,
   `rescheduleId` int(5) DEFAULT NULL,
+  `postedDate` date DEFAULT NULL,
   PRIMARY KEY (`Sno`),
   KEY `batchNo` (`batchNo`),
   KEY `slotNo` (`slotNo`),
@@ -45,7 +54,7 @@ CREATE TABLE `updateTimetable` (
   CONSTRAINT `updateTimetable_ibfk_4` FOREIGN KEY (`facultyCode`) REFERENCES `faculty` (`facultyCode`),
   CONSTRAINT `updateTimetable_ibfk_5` FOREIGN KEY (`hallNo`) REFERENCES `hall` (`hallNo`),
   CONSTRAINT `updateTimetable_ibfk_6` FOREIGN KEY (`rescheduleId`) REFERENCES `updateTimetable` (`Sno`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -54,9 +63,10 @@ CREATE TABLE `updateTimetable` (
 
 LOCK TABLES `updateTimetable` WRITE;
 /*!40000 ALTER TABLE `updateTimetable` DISABLE KEYS */;
-INSERT INTO `updateTimetable` VALUES (2,1,1,'COM209T','NSG','H15','2020-04-02','S',NULL),(3,1,2,'MAN202T','SVR','H25','2020-04-01','S',NULL),(4,2,1,'COM210P','APK','H22','2020-04-23','S',NULL),(5,2,3,'COM210P','ASK','H22','2020-04-21','S',NULL),(6,1,1,'COM209T','NSG','H15','2020-04-30','S',NULL),(7,1,1,'COM209T','NSG','H15','2020-05-01','S',NULL),(8,2,2,'COM210P','AKR','H21','2020-04-30','S',NULL),(9,2,1,'COM210P','NSG','H16','2020-04-30','S',NULL),(10,2,1,'COM209T','NSG','H14','2020-05-01','S',NULL),(11,2,7,'COM211T','NSG','H23','2020-05-01','S',NULL),(12,3,1,'COM210P','ASK','H12','2020-05-01','S',NULL),(13,3,2,'COM210P','NSG','H22','2020-05-01','S',NULL),(14,3,3,'COM211P','NSG','H26','2020-05-01','S',NULL),(15,3,1,'COM212T','APK','H25','2020-04-30','S',NULL),(16,3,3,'COM211P','APK','H24','2020-04-30','S',NULL),(17,3,6,'COM210P','AKR','H21','2020-05-01','S',NULL);
+INSERT INTO `updateTimetable` VALUES (26,1,1,'COM209T','NSG','H23','2020-05-07','S',NULL,'2020-05-05'),(27,1,2,'COM212P','JKL','L209','2020-05-07','CW',NULL,'2020-05-05'),(28,1,1,'COM210P','APK','H21','2020-05-08','S',NULL,'2020-05-05'),(30,3,3,'COM211P','BRJ','H16','2020-05-11','S',NULL,'2020-05-09'),(31,2,3,'COM211P','APK','H22','2020-05-08','CW',NULL,'2020-05-09'),(32,2,4,'COM211P','APK','H22','2020-05-08','CW',NULL,'2020-05-09'),(33,2,3,'COM210P','NSG','H22','2020-05-04','CW',NULL,'2020-05-09'),(34,3,1,'DES203T','JBI','H22','2020-05-12','S',NULL,'2020-05-09'),(35,2,2,'MAN202T','SVR','H25','2020-05-04','CW',NULL,'2020-05-09'),(36,2,2,'COM212T','JKL','H23','2020-05-05','CW',NULL,'2020-05-09'),(37,2,1,'MAN202T','SVR','H25','2020-05-04','CW',NULL,'2020-05-09'),(38,2,1,'COM211P','ASK','H21','2020-05-06','CW',NULL,'2020-05-09'),(39,2,2,'COM211P','APK','H22','2020-05-08','CW',NULL,'2020-05-09'),(40,2,1,'COM212T','JKL','H23','2020-05-05','CW',NULL,'2020-05-09'),(41,1,9,'COM211P','TSN','L209','2020-05-08','CW',NULL,'2020-05-09'),(42,1,1,'COM212T','JKL','H15','2020-05-11','CW',NULL,'2020-05-09'),(43,2,2,'MAN202T','SVR','H25','2020-05-11','CW',NULL,'2020-05-09'),(44,1,1,'COM212T','JKL','H15','2020-05-18','CW',NULL,'2020-05-09'),(45,1,5,'COM212T','JKL','H15','2020-05-11','S',NULL,'2020-05-09'),(46,2,7,'MAN202T','SVR','H13','2020-05-15','S',NULL,'2020-05-10'),(47,1,2,'COM211T','TSN','H15','2020-05-15','CW',NULL,'2020-05-13');
 /*!40000 ALTER TABLE `updateTimetable` ENABLE KEYS */;
 UNLOCK TABLES;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -67,4 +77,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-05-01 11:50:51
+-- Dump completed on 2020-05-21 22:58:51

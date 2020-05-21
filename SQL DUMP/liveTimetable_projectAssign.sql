@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.29, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.30, for Linux (x86_64)
 --
--- Host: 127.0.0.1    Database: liveTimetable
+-- Host: aauorfmbt136d0.cuz1bxluuufz.ap-south-1.rds.amazonaws.com    Database: liveTimetable
 -- ------------------------------------------------------
--- Server version	5.7.29-0ubuntu0.18.04.1
+-- Server version	8.0.16
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
+
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED='';
 
 --
 -- Table structure for table `projectAssign`
@@ -34,6 +42,7 @@ CREATE TABLE `projectAssign` (
   `dueDate` date DEFAULT NULL,
   `dueTime` time DEFAULT NULL,
   `topic` varchar(1000) DEFAULT NULL,
+  `teamSize` int(11) DEFAULT NULL,
   PRIMARY KEY (`Sno`),
   KEY `batchNo` (`batchNo`),
   KEY `courseCode` (`courseCode`),
@@ -41,7 +50,7 @@ CREATE TABLE `projectAssign` (
   CONSTRAINT `projectAssign_ibfk_1` FOREIGN KEY (`batchNo`) REFERENCES `batch` (`batchNo`),
   CONSTRAINT `projectAssign_ibfk_2` FOREIGN KEY (`courseCode`) REFERENCES `course` (`courseCode`),
   CONSTRAINT `projectAssign_ibfk_3` FOREIGN KEY (`facultyCode`) REFERENCES `faculty` (`facultyCode`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -50,9 +59,10 @@ CREATE TABLE `projectAssign` (
 
 LOCK TABLES `projectAssign` WRITE;
 /*!40000 ALTER TABLE `projectAssign` DISABLE KEYS */;
-INSERT INTO `projectAssign` VALUES (4,'2020-04-24','COM209T','APK','Sample 2','With Attachment',1,123,'2020-04-24','06:00:00','ATA'),(5,'2020-04-24','COM211P','ASK','Attacment Download','Downloadable attachment',3,123,'2020-04-29','02:00:00','ATA'),(6,'2020-04-24','COM209T','APK','Test a pdf','Testing a pdf ata',1,123,'2020-04-29','00:00:00','ATA');
+INSERT INTO `projectAssign` VALUES (4,'2020-04-24','COM209T','APK','Sample 2','With Attachment',1,123,'2020-04-24','06:00:00','ATA',NULL),(5,'2020-04-24','COM211P','ASK','Attacment Download','Downloadable attachment',3,123,'2020-04-29','02:00:00','ATA',NULL),(7,'2020-05-05','COM212P','JKL','DBMS Submission','Design a Web Application',1,50,'2020-05-10','16:00:00','DBMS',5),(8,'2020-05-05','COM211P','TSN','CO Lab','Complete ARMSim exercise related to caching',1,10,'2020-05-09','10:00:00','CO Lab',1),(10,'2020-05-06','COM210P','APK','Sample','Format Finder',1,12,'2020-05-14','01:00:00','DAS',NULL),(12,'2020-05-06','COM211P','BM','Test a pdf','PDF',3,12,'2020-05-22','01:00:00','PDF',NULL),(15,'2020-05-07','COM210P','ASK','Project 103','Complete Project',2,10,'2020-05-08','03:00:00','PRO',3),(17,'2020-05-09','COM212P','JKL','DBMS Project','Build a web app with MySQL Backend',1,50,'2020-05-10','17:00:00','DBMS',5),(18,'2020-05-10','COM211P','TSN','CO Lab Submission','Submit Lab Codes by this Week',1,10,'2020-05-15','17:00:00','CO',1);
 /*!40000 ALTER TABLE `projectAssign` ENABLE KEYS */;
 UNLOCK TABLES;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -63,4 +73,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-05-01 11:50:49
+-- Dump completed on 2020-05-21 22:58:47

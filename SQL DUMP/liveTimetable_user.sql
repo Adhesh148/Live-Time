@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.29, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.30, for Linux (x86_64)
 --
--- Host: 127.0.0.1    Database: liveTimetable
+-- Host: aauorfmbt136d0.cuz1bxluuufz.ap-south-1.rds.amazonaws.com    Database: liveTimetable
 -- ------------------------------------------------------
--- Server version	5.7.29-0ubuntu0.18.04.1
+-- Server version	8.0.16
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,6 +14,14 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
+
+--
+-- GTID state at the beginning of the backup 
+--
+
+SET @@GLOBAL.GTID_PURGED='';
 
 --
 -- Table structure for table `user`
@@ -28,7 +36,7 @@ CREATE TABLE `user` (
   `password` varchar(30) NOT NULL,
   `roles` varchar(20) NOT NULL,
   `userName` varchar(30) NOT NULL,
-  `batchNo` int(3),
+  `batchNo` int(3) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `userName` (`userName`),
   UNIQUE KEY `id` (`id`),
@@ -43,9 +51,10 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (2,1,'123','ADMIN','Adhesh',NULL),(3,1,'123','USER','COE18B001',1);
+INSERT INTO `user` VALUES (2,1,'123','ADMIN','Adhesh',NULL),(3,1,'123456789','USER','adhesh148',1),(4,1,'ashwin','ADMIN','ashwin',NULL),(5,1,'aparajith','ADMIN','aparajith21',NULL),(7,1,'anant@0301','ADMIN','anant',NULL),(8,1,'password6969','ADMIN','akshun',NULL),(9,1,'123456789','USER','coe18b003',1),(10,1,'anant@0301','USER','coe18b004',1),(11,1,'123456789','USER','coe18b005',1),(12,1,'123456789','USER','coe18b006',1),(13,1,'123','ADMIN','guest_admin',NULL),(14,1,'123','USER','guest_user',1);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -56,4 +65,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-05-01 11:50:52
+-- Dump completed on 2020-05-21 22:58:54

@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.29, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.30, for Linux (x86_64)
 --
--- Host: 127.0.0.1    Database: liveTimetable
+-- Host: aauorfmbt136d0.cuz1bxluuufz.ap-south-1.rds.amazonaws.com    Database: liveTimetable
 -- ------------------------------------------------------
--- Server version	5.7.29-0ubuntu0.18.04.1
+-- Server version	8.0.16
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -14,33 +14,39 @@
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET @MYSQLDUMP_TEMP_LOG_BIN = @@SESSION.SQL_LOG_BIN;
+SET @@SESSION.SQL_LOG_BIN= 0;
 
 --
--- Table structure for table `userLog`
+-- GTID state at the beginning of the backup 
 --
 
-DROP TABLE IF EXISTS `userLog`;
+SET @@GLOBAL.GTID_PURGED='';
+
+--
+-- Table structure for table `hall`
+--
+
+DROP TABLE IF EXISTS `hall`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `userLog` (
-  `loginId` int(10) NOT NULL AUTO_INCREMENT,
-  `userId` int(11) NOT NULL,
-  `loginTime` datetime NOT NULL,
-  PRIMARY KEY (`loginId`),
-  KEY `userId` (`userId`),
-  CONSTRAINT `userLog_ibfk_1` FOREIGN KEY (`userId`) REFERENCES `user` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
+CREATE TABLE `hall` (
+  `hallNo` varchar(5) NOT NULL,
+  `hallStrength` int(4) DEFAULT NULL,
+  PRIMARY KEY (`hallNo`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `userLog`
+-- Dumping data for table `hall`
 --
 
-LOCK TABLES `userLog` WRITE;
-/*!40000 ALTER TABLE `userLog` DISABLE KEYS */;
-INSERT INTO `userLog` VALUES (1,2,'2020-05-01 10:40:53'),(2,3,'2020-05-01 10:41:37');
-/*!40000 ALTER TABLE `userLog` ENABLE KEYS */;
+LOCK TABLES `hall` WRITE;
+/*!40000 ALTER TABLE `hall` DISABLE KEYS */;
+INSERT INTO `hall` VALUES ('H01',102),('H02',102),('H04',102),('H05',204),('H11',88),('H12',88),('H13',98),('H14',98),('H15',204),('H16',88),('H17',106),('H21',88),('H22',88),('H23',98),('H24',98),('H25',204),('H26',108),('H27',110),('H31',108),('H32',108),('L209',120);
+/*!40000 ALTER TABLE `hall` ENABLE KEYS */;
 UNLOCK TABLES;
+SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -51,4 +57,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-05-01 11:50:53
+-- Dump completed on 2020-05-21 22:59:01
