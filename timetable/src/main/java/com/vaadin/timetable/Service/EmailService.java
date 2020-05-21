@@ -1,8 +1,7 @@
 package com.vaadin.timetable.Service;
 
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.timetable.EmailBean;
-import org.springframework.stereotype.Service;
+import com.vaadin.timetable.view.EmailBean;
 
 import javax.mail.Message;
 import javax.mail.PasswordAuthentication;
@@ -23,7 +22,7 @@ public class EmailService {
 
     public void sendEmail(EmailBean emailBean) {
         String username = "adhesh100@gmail.com";
-        String password = "*****";
+        String password = "****";
         Properties prop = new Properties();
         prop.put("mail.smtp.auth","true");
         prop.put("mail.smtp.starttls.enable","true");

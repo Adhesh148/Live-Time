@@ -253,3 +253,13 @@ font-weight:bold;
     height: inherit;
 }
 
+.main-heading{
+    font-size:63px;
+    font-weight:900;
+}
+
+.main-message{
+    font-size:23px;
+    font-weight:200;
+}
+
