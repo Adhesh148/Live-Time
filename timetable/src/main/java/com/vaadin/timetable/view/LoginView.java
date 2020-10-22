@@ -17,16 +17,31 @@ import com.vaadin.flow.router.Route;
 import java.util.Collections;
 
 @Route("login")
-@PageTitle("Login | Live Timetable")
-public class LoginView extends VerticalLayout {
+@PageTitle("Login | BoilerPlate")
+public class LoginView extends VerticalLayout implements BeforeEnterObserver {
 
-    LoginForm login = new LoginForm();
+    private LoginForm login = new LoginForm();
+
     public LoginView(){
+        addClassName("login-view");
+        setSizeFull();
+        setAlignItems(Alignment.CENTER);
 
+        setJustifyContentMode(JustifyContentMode.CENTER);
         login.setAction("login");
-        add(login);
+        add(new H1("Boiler Plate"), login);
     }
 
+    @Override
+    public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
+        // inform the user about an authentication error
+        if(beforeEnterEvent.getLocation()
+                .getQueryParameters()
+                .getParameters()
+                .containsKey("error")) {
+            login.setError(true);
+        }
+    }
 }
 
 

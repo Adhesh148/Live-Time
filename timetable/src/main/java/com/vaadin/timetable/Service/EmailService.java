@@ -22,7 +22,7 @@ public class EmailService {
 
     public void sendEmail(EmailBean emailBean) {
         String username = "adhesh100@gmail.com";
-        String password = "****";
+        String password = "123_Phoenix";
         Properties prop = new Properties();
         prop.put("mail.smtp.auth","true");
         prop.put("mail.smtp.starttls.enable","true");

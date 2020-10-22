@@ -31,7 +31,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
+    import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDate;
@@ -43,7 +43,7 @@ import java.util.Collection;
 
 public class ProjectPanel extends VerticalLayout {
 
-    String url = "jdbc:mysql://aauorfmbt136d0.cuz1bxluuufz.ap-south-1.rds.amazonaws.com:3306/liveTimetable";
+    String url = "jdbc:mysql://localhost:3306/liveTimetable";
     String user = "dbms";
     String pwd = "Password_123";
     private int projectNo = 0;

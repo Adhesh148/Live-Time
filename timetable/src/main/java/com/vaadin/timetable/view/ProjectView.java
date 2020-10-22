@@ -33,7 +33,7 @@ import java.util.Collection;
 public class ProjectView extends VerticalLayout {
     Button create = new Button("Create", VaadinIcon.PLUS.create());
 
-    String url = "jdbc:mysql://aauorfmbt136d0.cuz1bxluuufz.ap-south-1.rds.amazonaws.com:3306/liveTimetable";
+    String url = "jdbc:mysql://localhost:3306/liveTimetable";
     String user = "dbms";
     String pwd = "Password_123";
     LocalDate today = LocalDate.now();
@@ -54,6 +54,7 @@ public class ProjectView extends VerticalLayout {
         updateProjectPanels();
     }
 
+//    to rectify error that only arises on Sunday.
     private void setDays(int dayOfWeek, LocalDate sun, LocalDate sat) {
         if(dayOfWeek==7){
             Sun = today;

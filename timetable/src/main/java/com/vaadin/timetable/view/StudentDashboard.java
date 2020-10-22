@@ -28,7 +28,7 @@ import java.util.Collection;
 @Route(value = "student_dashboard",layout = MainView.class)
 public class StudentDashboard extends VerticalLayout {
 
-   private static String url = "jdbc:mysql://aauorfmbt136d0.cuz1bxluuufz.ap-south-1.rds.amazonaws.com:3306/liveTimetable";
+   private static String url = "jdbc:mysql://localhost:3306/liveTimetable";
    private static String user = "dbms";
    private static  String pwd = "Password_123";
 

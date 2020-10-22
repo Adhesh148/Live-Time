@@ -18,7 +18,7 @@ import java.sql.*;
 
 public class StudentRecordForm extends VerticalLayout {
 
-    String url = "jdbc:mysql://aauorfmbt136d0.cuz1bxluuufz.ap-south-1.rds.amazonaws.com:3306/liveTimetable";
+    String url = "jdbc:mysql://localhost:3306/liveTimetable";
     String user = "dbms";
     String pwd = "Password_123";
 
