@@ -21,9 +21,9 @@ Instead of continuous back and forth communication between you, the TA, and the 
 > Contains the java Spring-boot project, a.k.a, the front-end of the application. Instruction to run the project is included as well.
 
 ## Documentation
-A link to the detailed documentation of the project is provided here:
-https://docs.google.com/document/d/1y5_eQn6QWDBolpD0KiZO-KcqQ5wLPsUQDuTQD_O76I4/edit?usp=sharing
-A demo of certain features
+A link to the detailed documentation of the project is provided here: <br />
+https://docs.google.com/document/d/1y5_eQn6QWDBolpD0KiZO-KcqQ5wLPsUQDuTQD_O76I4/edit?usp=sharing <br />
+A demo of certain features <br />
 https://www.youtube.com/watch?v=wYbrWZcp4Cc&feature=youtu.be
 
 ## Deployment (Not applicable now)
