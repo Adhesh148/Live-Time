@@ -24,7 +24,7 @@ Instead of continuous back and forth communication between you, the TA, and the 
 A link to the detailed documentation of the project is provided here:
 https://docs.google.com/document/d/1wDmW2OfWIghyhiebyFvt-MdVopgVognuSodsG4jAOLw/edit?usp=sharing
 
-## Deployment
+## Deployment (Not applicable now)
 The database (MySQL) has been deployed on the Amazon RDS and the web app has been deployed using the AWS Elastic Beanstalk Web service. Here is the link to the hosted version.
 http://livetimetable-env.eba-gmnhuzkq.ap-south-1.elasticbeanstalk.com/login
 
@@ -41,3 +41,12 @@ https://www.youtube.com/watch?v=wYbrWZcp4Cc&feature=youtu.be
 
 Please leave your valuable feedback about the application.
 
+## Look at the UI.
+#### Dashboard
+![ui](resources/Screenshots/final/dashboard.png)  
+#### Live Timetable - Admin View
+![ui](resources/Screenshots/final/admin_live.png)
+#### Project Manager - Admin View
+![ui](resources/Screenshots/final/assignment_admin.png)
+#### Dark Mode
+![ui](resources/Screenshots/final/dark_mode.png)
