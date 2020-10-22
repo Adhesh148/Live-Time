@@ -22,7 +22,9 @@ Instead of continuous back and forth communication between you, the TA, and the 
 
 ## Documentation
 A link to the detailed documentation of the project is provided here:
-https://docs.google.com/document/d/1wDmW2OfWIghyhiebyFvt-MdVopgVognuSodsG4jAOLw/edit?usp=sharing
+https://docs.google.com/document/d/1y5_eQn6QWDBolpD0KiZO-KcqQ5wLPsUQDuTQD_O76I4/edit?usp=sharing
+A demo of certain features
+https://www.youtube.com/watch?v=wYbrWZcp4Cc&feature=youtu.be
 
 ## Deployment (Not applicable now)
 The database (MySQL) has been deployed on the Amazon RDS and the web app has been deployed using the AWS Elastic Beanstalk Web service. Here is the link to the hosted version.
